@@ -119,70 +119,83 @@ export function DataTable<T extends { id: string | number }>({
   };
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-700">
-        <thead className="bg-gray-800">
-          <tr>
-            {actions && <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">{actionsLabel ?? t('common.actions')}</th>}
-            {columns.map((column) => (
-              <th
-                key={String(column.key)}
-                className={`px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider ${
-                  column.sortable ? 'cursor-pointer hover:bg-gray-700' : ''
-                }`}
-                onClick={() => column.sortable && handleSort(column.key)}
-              >
-                {column.label}
-                {column.sortable && sortConfig?.key === column.key && (
-                  <span className="ml-1">
-                    {sortConfig.direction === 'asc' ? '↑' : '↓'}
-                  </span>
-                )}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody className="bg-gray-900 divide-y divide-gray-700">
-          {paginatedData.length === 0 ? (
+    <div className="flex flex-col">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-700">
+          <thead className="bg-gray-800">
             <tr>
-              <td colSpan={columns.length + (actions ? 1 : 0)} className="px-6 py-4 text-center text-gray-400">
-                {t('common.noDataAvailable')}
-              </td>
+              {actions && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                  {actionsLabel ?? t('common.actions')}
+                </th>
+              )}
+              {columns.map((column) => (
+                <th
+                  key={String(column.key)}
+                  className={`px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider ${
+                    column.sortable ? 'cursor-pointer hover:bg-gray-700' : ''
+                  }`}
+                  onClick={() => column.sortable && handleSort(column.key)}
+                >
+                  {column.label}
+                  {column.sortable && sortConfig?.key === column.key && (
+                    <span className="ml-1">
+                      {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                    </span>
+                  )}
+                </th>
+              ))}
             </tr>
-          ) : (
-            paginatedData.map((row) => (
-              <tr
-                key={row.id}
-                className={`hover:bg-gray-800 ${
-                  onRowClick ? 'cursor-pointer' : ''
-                }`}
-                onClick={() => onRowClick?.(row)}
-              >
-                {actions && (
-                  <td className="px-6 py-4 whitespace-nowrap text-sm" onClick={(e) => e.stopPropagation()}>
-                    {actions(row)}
-                  </td>
-                )}
-                {columns.map((column) => (
-                  <td key={String(column.key)} className="px-6 py-4 whitespace-nowrap text-sm text-gray-100">
-                    {column.render
-                      ? column.render(row[column.key as keyof T], row)
-                      : String(row[column.key as keyof T] ?? '')}
-                  </td>
-                ))}
+          </thead>
+          <tbody className="bg-gray-900 divide-y divide-gray-700">
+            {paginatedData.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={columns.length + (actions ? 1 : 0)}
+                  className="px-6 py-4 text-center text-gray-400"
+                >
+                  {t('common.noDataAvailable')}
+                </td>
               </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-      
+            ) : (
+              paginatedData.map((row) => (
+                <tr
+                  key={row.id}
+                  className={`hover:bg-gray-800 ${onRowClick ? 'cursor-pointer' : ''}`}
+                  onClick={() => onRowClick?.(row)}
+                >
+                  {actions && (
+                    <td
+                      className="px-6 py-4 whitespace-nowrap text-sm"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {actions(row)}
+                    </td>
+                  )}
+                  {columns.map((column) => (
+                    <td
+                      key={String(column.key)}
+                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-100"
+                    >
+                      {column.render
+                        ? column.render(row[column.key as keyof T], row)
+                        : String(row[column.key as keyof T] ?? '')}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
       {totalPages > 1 && (
         <div className="flex items-center justify-between px-6 py-4 bg-gray-900 border-t border-gray-700">
           <div className="text-sm text-gray-300">
             {t('common.showingResults', {
               start: (currentPage - 1) * pageSize + 1,
               end: Math.min(currentPage * pageSize, totalCount),
-              total: totalCount
+              total: totalCount,
             })}
           </div>
           <div className="flex items-center gap-2">
@@ -197,7 +210,7 @@ export function DataTable<T extends { id: string | number }>({
             <div className="text-sm text-gray-300">
               {t('common.pageOf', {
                 current: currentPage,
-                total: totalPages
+                total: totalPages,
               })}
             </div>
             <Button
