@@ -138,7 +138,7 @@ export default function LoginPage() {
             />
           )}
 
-          <div>
+          <div className="space-y-3">
             <Button
               type="submit"
               variant="primary"
@@ -147,6 +147,15 @@ export default function LoginPage() {
               disabled={loginMutation.isPending}
             >
               {loginMutation.isPending ? t('common.loading') : t('auth.loginButton')}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="lg"
+              className="w-full"
+              onClick={() => router.push(`/${locale}`)}
+            >
+              {t('common.goHome')}
             </Button>
           </div>
         </form>

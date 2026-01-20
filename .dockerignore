@@ -1,0 +1,10 @@
+# Dependencies
+node_modules
+# Build artifacts
+dist
+# Docker-related files
+Dockerfile
+.dockerignore
+# Environment files
+.env
+

@@ -257,6 +257,17 @@ export function Header() {
               )}
             </div>
 
+            {isAdminPage && (
+              <Button
+                variant="outline"
+                size="md"
+                onClick={() => router.push(`/${locale}`)}
+                className="flex items-center gap-2 transition-all duration-200 hover:scale-105"
+              >
+                {t('common.goHome')}
+              </Button>
+            )}
+
             {user && !isAdminPage ? (
               <button
                 onClick={() => {
