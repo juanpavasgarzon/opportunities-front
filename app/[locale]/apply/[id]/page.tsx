@@ -2,7 +2,6 @@
 
 import { ApplicationForm } from '@/components/jobs/ApplicationForm';
 import { JobOpportunityInfo } from '@/components/jobs/JobOpportunityInfo';
-import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { useJob } from '@/hooks/useJobs';
 import { applyToJob } from '@/lib/api/jobs';
@@ -10,6 +9,7 @@ import { ArrowLeft, Loader2, Share2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function ApplyPage() {
   const t = useTranslations();
@@ -20,7 +20,6 @@ export default function ApplyPage() {
 
   const { data: job, isLoading: isLoadingJob, error: jobError } = useJob(jobId);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const handleShare = async () => {
     if (typeof window !== 'undefined' && job) {
@@ -36,27 +35,15 @@ export default function ApplyPage() {
           await navigator.share(shareData);
         } else {
           await navigator.clipboard.writeText(url);
-          setAlert({
-            type: 'success',
-            message: t('common.linkCopied'),
-          });
-          setTimeout(() => setAlert(null), 3000);
+          toast.success(t('common.linkCopied'));
         }
       } catch (error) {
         if (error instanceof Error && error.name !== 'AbortError') {
           try {
             await navigator.clipboard.writeText(url);
-            setAlert({
-              type: 'success',
-              message: t('common.linkCopied'),
-            });
-            setTimeout(() => setAlert(null), 3000);
+            toast.success(t('common.linkCopied'));
           } catch {
-            setAlert({
-              type: 'error',
-              message: t('common.shareError'),
-            });
-            setTimeout(() => setAlert(null), 3000);
+            toast.error(t('common.shareError'));
           }
         }
       }
@@ -65,7 +52,6 @@ export default function ApplyPage() {
 
   const handleSubmit = async (data: { name: string; email: string; phone: string; cv: File }) => {
     setIsSubmitting(true);
-    setAlert(null);
 
     try {
       await applyToJob(jobId, {
@@ -75,19 +61,13 @@ export default function ApplyPage() {
         cv: data.cv,
       });
 
-      setAlert({
-        type: 'success',
-        message: t('jobs.applicationSubmitted', { title: job?.title || '' }),
-      });
+      toast.success(t('jobs.applicationSubmitted', { title: job?.title || '' }));
 
       setTimeout(() => {
         router.push(`/${locale}`);
       }, 2000);
     } catch {
-      setAlert({
-        type: 'error',
-        message: t('jobs.applicationError'),
-      });
+      toast.error(t('jobs.applicationError'));
     } finally {
       setIsSubmitting(false);
     }
@@ -118,8 +98,7 @@ export default function ApplyPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 py-8">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-4xl">
         <div className="mb-6 flex items-center justify-between">
           <Button
             variant="outline"
@@ -139,30 +118,16 @@ export default function ApplyPage() {
           </Button>
         </div>
 
-        {alert && (
-          <div className="mb-6">
-            <Alert
-              type={alert.type}
-              message={alert.message}
-              onClose={() => setAlert(null)}
-            />
-          </div>
-        )}
-
         <div className="bg-gray-800 rounded-lg shadow-xl border border-gray-700 overflow-hidden">
           <JobOpportunityInfo job={job} />
           <ApplicationForm 
             onSubmit={handleSubmit} 
             isSubmitting={isSubmitting}
             onValidationError={(message) => {
-              setAlert({
-                type: 'error',
-                message,
-              });
+              toast.error(message);
             }}
           />
         </div>
-      </div>
     </div>
   );
 }

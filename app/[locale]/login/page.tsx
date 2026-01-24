@@ -1,6 +1,5 @@
 'use client';
 
-import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { useLogin, useMe } from '@/hooks/useAuth';
@@ -10,6 +9,7 @@ import { ArrowLeft } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function LoginPage() {
   const t = useTranslations();
@@ -17,7 +17,6 @@ export default function LoginPage() {
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [mounted, setMounted] = useState(false);
   const loginMutation = useLogin();
   // Only fetch /auth/me if there's a user in localStorage (to avoid unnecessary requests after logout)
@@ -89,7 +88,6 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
 
     try {
       const response = await loginMutation.mutateAsync({ username_or_email: username, password });
@@ -120,72 +118,64 @@ export default function LoginPage() {
     } catch (err) {
       console.error(err);
       const errorMessage = err instanceof Error ? err.message : t('auth.invalidCredentials');
-      setError(errorMessage);
+      toast.error(errorMessage);
     }
   };
 
   return (
-    <div className="flex items-start justify-center bg-gray-900 pt-20 pb-20 relative">
-      <div className="absolute top-4 left-0 w-full">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <Button
-            variant="outline"
-            onClick={() => router.push(`/${locale}`)}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t('common.goBack')}
-          </Button>
-        </div>
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+      <div className="mb-6">
+        <Button
+          variant="outline"
+          onClick={() => router.push(`/${locale}`)}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {t('common.goBack')}
+        </Button>
       </div>
-      <div className="w-full max-w-md space-y-6 mt-4">
-        <div>
-          <h2 className="text-center text-3xl font-extrabold text-white">
-            {t('auth.loginTitle')}
-          </h2>
-          <p className="mt-3 text-center text-sm text-gray-300 max-w-md mx-auto">
-            {t('auth.loginDescription')}
-          </p>
-        </div>
-        <form className="space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
-            <Input
-              label={t('auth.usernameOrEmail')}
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              autoComplete="username"
-              placeholder={t('auth.usernameOrEmailPlaceholder')}
-            />
-            <Input
-              label={t('auth.password')}
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              autoComplete="current-password"
-            />
+      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+        <div className="w-full max-w-md space-y-6">
+          <div>
+            <h2 className="text-center text-3xl font-extrabold text-white">
+              {t('auth.loginTitle')}
+            </h2>
+            <p className="mt-3 text-center text-sm text-gray-300 max-w-md mx-auto">
+              {t('auth.loginDescription')}
+            </p>
           </div>
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <Input
+                label={t('auth.usernameOrEmail')}
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                autoComplete="username"
+                placeholder={t('auth.usernameOrEmailPlaceholder')}
+              />
+              <Input
+                label={t('auth.password')}
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                autoComplete="current-password"
+              />
+            </div>
 
-          {error && (
-            <Alert
-              type="error"
-              message={error}
-              onClose={() => setError('')}
-            />
-          )}
-
-          <Button
-            type="submit"
-            variant="primary"
-            size="lg"
-            className="w-full"
-            disabled={loginMutation.isPending}
-          >
-            {loginMutation.isPending ? t('common.loading') : t('auth.loginButton')}
-          </Button>
-        </form>
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              className="w-full"
+              disabled={loginMutation.isPending}
+            >
+              {loginMutation.isPending ? t('common.loading') : t('auth.loginButton')}
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );

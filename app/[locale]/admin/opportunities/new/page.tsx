@@ -7,7 +7,7 @@ import { useCreateJob } from '@/hooks/useJobs';
 import { JobOpportunity } from '@/lib/types';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function CreateOpportunityPage() {
   return (
@@ -22,10 +22,8 @@ function CreateOpportunityContent() {
   const locale = useLocale();
   const router = useRouter();
   const createJobMutation = useCreateJob();
-  const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
 
   const handleSubmit = async (data: Partial<JobOpportunity>) => {
-    setAlert(null);
     try {
       await createJobMutation.mutateAsync({
         title: data.title || '',
@@ -42,30 +40,23 @@ function CreateOpportunityContent() {
         post_date: data.post_date || new Date().toISOString().split('T')[0],
       });
       
-      setAlert({
-        type: 'success',
-        message: t('jobs.jobCreated')
-      });
-      
-      setTimeout(() => {
-        router.push(`/${locale}/admin/opportunities`);
-      }, 1500);
+      toast.success(t('jobs.jobCreated'));
+      router.push(`/${locale}/admin/opportunities`);
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : t('jobs.jobCreateError');
+      toast.error(errorMessage);
       throw error; // Re-throw to let JobForm handle the error display
     }
   };
 
   return (
     <OpportunityFormPageLayout
-      alert={alert}
-      onAlertClose={() => setAlert(null)}
       backUrl={`/${locale}/admin/opportunities`}
     >
       <JobForm
         onSubmit={handleSubmit}
         onCancel={() => router.push(`/${locale}/admin/opportunities`)}
         isLoading={createJobMutation.isPending}
-        initialAlert={alert}
       />
     </OpportunityFormPageLayout>
   );

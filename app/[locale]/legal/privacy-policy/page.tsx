@@ -13,8 +13,7 @@ export default function PrivacyPolicyPage() {
   const { data: legalDocument, isLoading, error } = usePrivacyPolicy(locale);
 
   return (
-    <div className="min-h-screen bg-gray-900 py-12">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-4xl">
         <div className="mb-6">
           <Link href={`/${locale}`}>
             <Button variant="outline" className="flex items-center gap-2">
@@ -74,7 +73,6 @@ export default function PrivacyPolicyPage() {
             <p className="text-gray-400">{t('legal.documentNotFound')}</p>
           </div>
         )}
-      </div>
     </div>
   );
 }

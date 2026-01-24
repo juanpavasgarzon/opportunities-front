@@ -1,7 +1,6 @@
 'use client';
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { Alert } from '@/components/ui/Alert';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { DataTable } from '@/components/ui/DataTable';
 import { ResetPasswordModal } from '@/components/ui/ResetPasswordModal';
@@ -18,6 +17,7 @@ import { Loader2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function UsersPage() {
   const t = useTranslations();
@@ -45,7 +45,6 @@ export default function UsersPage() {
   const deleteUserMutation = useDeleteUser();
   const resetPasswordMutation = useResetPassword();
   const createUserMutation = useCreateUser();
-  const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     type: 'inactivate' | 'delete';
@@ -132,19 +131,11 @@ export default function UsersPage() {
     try {
       const { password, ...userWithoutPassword } = userData;
       await createUserMutation.mutateAsync({ ...userWithoutPassword, password });
-      setAlert({
-        type: 'success',
-        message: t('users.userCreated')
-      });
-      setTimeout(() => setAlert(null), 3000);
+      toast.success(t('users.userCreated'));
       setShowCreateModal(false);
     } catch (error) {
       console.error('Error creating user:', error);
-      setAlert({
-        type: 'error',
-        message: t('users.userCreateError')
-      });
-      setTimeout(() => setAlert(null), 3000);
+      toast.error(t('users.userCreateError'));
     }
   };
 
@@ -157,27 +148,16 @@ export default function UsersPage() {
     try {
       if (user.active) {
         await deactivateUserMutation.mutateAsync(String(user.id));
-        setAlert({
-          type: 'success',
-          message: t('users.userUpdated', { action: t('users.inactivated') })
-        });
+        toast.success(t('users.userUpdated', { action: t('users.inactivated') }));
       } else {
         await activateUserMutation.mutateAsync(String(user.id));
-        setAlert({
-          type: 'success',
-          message: t('users.userUpdated', { action: t('users.activated') })
-        });
+        toast.success(t('users.userUpdated', { action: t('users.activated') }));
       }
       setConfirmModal({ isOpen: false, type: 'inactivate', user: null });
-      setTimeout(() => setAlert(null), 3000);
     } catch (error) {
       console.error('Error updating user:', error);
       const errorMessage = error instanceof Error ? error.message : t('users.userUpdateError');
-      setAlert({
-        type: 'error',
-        message: errorMessage
-      });
-      setTimeout(() => setAlert(null), 3000);
+      toast.error(errorMessage);
     }
   };
 
@@ -189,20 +169,12 @@ export default function UsersPage() {
 
     try {
       await deleteUserMutation.mutateAsync(String(user.id));
-      setAlert({
-        type: 'success',
-        message: t('users.userDeleted', { username: user.username })
-      });
+      toast.success(t('users.userDeleted', { username: user.username }));
       setConfirmModal({ isOpen: false, type: 'delete', user: null });
-      setTimeout(() => setAlert(null), 3000);
     } catch (error) {
       console.error('Error deleting user:', error);
       const errorMessage = error instanceof Error ? error.message : t('users.userDeleteError');
-      setAlert({
-        type: 'error',
-        message: errorMessage
-      });
-      setTimeout(() => setAlert(null), 3000);
+      toast.error(errorMessage);
     }
   };
 
@@ -214,19 +186,11 @@ export default function UsersPage() {
 
     try {
       await resetPasswordMutation.mutateAsync({ id: String(user.id), password });
-      setAlert({
-        type: 'success',
-        message: t('users.passwordResetSuccess', { username: user.username })
-      });
-      setTimeout(() => setAlert(null), 3000);
+      toast.success(t('users.passwordResetSuccess', { username: user.username }));
       setResetPasswordModal({ isOpen: false, user: null });
     } catch (error) {
       console.error('Error resetting password:', error);
-      setAlert({
-        type: 'error',
-        message: t('users.passwordResetError')
-      });
-      setTimeout(() => setAlert(null), 3000);
+      toast.error(t('users.passwordResetError'));
     }
   };
 
@@ -307,15 +271,6 @@ export default function UsersPage() {
       <div>
         <UsersHeader />
 
-        {alert && (
-          <Alert
-            type={alert.type}
-            message={alert.message}
-            onClose={() => setAlert(null)}
-            autoClose
-          />
-        )}
-
         <UsersSearchBar
           value={inputValue}
           onChange={setInputValue}
@@ -330,7 +285,7 @@ export default function UsersPage() {
             </div>
           </div>
         ) : (
-          <div className="bg-gray-800 rounded-lg shadow">
+          <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
             <div className="overflow-x-auto overflow-y-visible">
               <DataTable
               data={users}

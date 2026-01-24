@@ -1,7 +1,6 @@
 'use client';
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { Alert } from '@/components/ui/Alert';
 import { LoadingState } from '@/components/common/LoadingState';
 import { CompanyConfigurationForm } from '@/components/settings/CompanyConfigurationForm';
 import { EmailConfigurationForm } from '@/components/settings/EmailConfigurationForm';
@@ -13,6 +12,7 @@ import { Settings as SettingsIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 
 export default function SettingsPage() {
   const t = useTranslations();
@@ -29,7 +29,6 @@ export default function SettingsPage() {
     cc: '',
     bcc: ''
   });
-  const [alert, setAlert] = useState<{ type: 'success' | 'error' | 'warning'; message: string } | null>(null);
   const [mounted, setMounted] = useState(false);
   const [currentUser, setCurrentUser] = useState<{ role: string } | null>(null);
   const [testingConnection, setTestingConnection] = useState(false);
@@ -140,27 +139,15 @@ export default function SettingsPage() {
           });
 
           window.dispatchEvent(new Event('logo-updated'));
-          setAlert({
-            type: 'success',
-            message: t('settings.logoUploaded')
-          });
-          setTimeout(() => setAlert(null), 3000);
+          toast.success(t('settings.logoUploaded'));
         } catch (error) {
           console.error('Error uploading logo:', error);
-          setAlert({
-            type: 'error',
-            message: t('settings.logoUploadError')
-          });
-          setTimeout(() => setAlert(null), 3000);
+          toast.error(t('settings.logoUploadError'));
         }
       };
       reader.onerror = () => {
         console.error('Error reading file');
-        setAlert({
-          type: 'error',
-          message: t('settings.logoUploadError')
-        });
-        setTimeout(() => setAlert(null), 3000);
+        toast.error(t('settings.logoUploadError'));
       };
       reader.readAsDataURL(file);
     }
@@ -168,11 +155,7 @@ export default function SettingsPage() {
 
   const handleCompanySave = async () => {
     if (!companyName.trim()) {
-      setAlert({
-        type: 'warning',
-        message: t('settings.companyNameRequired')
-      });
-      setTimeout(() => setAlert(null), 3000);
+      toast.error(t('settings.companyNameRequired'));
       return;
     }
 
@@ -190,19 +173,11 @@ export default function SettingsPage() {
       window.dispatchEvent(new Event('logo-updated'));
       window.dispatchEvent(new Event('company-name-updated'));
 
-      setAlert({
-        type: 'success',
-        message: t('settings.companySaved')
-      });
-      setTimeout(() => setAlert(null), 3000);
+      toast.success(t('settings.companySaved'));
     } catch (error) {
       console.error('Error saving company configuration:', error);
       const errorMessage = error instanceof Error ? error.message : t('settings.companySaveError');
-      setAlert({
-        type: 'error',
-        message: errorMessage
-      });
-      setTimeout(() => setAlert(null), 3000);
+      toast.error(errorMessage);
     }
   };
 
@@ -216,19 +191,11 @@ export default function SettingsPage() {
 
       localStorage.setItem('email_config', JSON.stringify(emailConfig));
 
-      setAlert({
-        type: 'success',
-        message: t('settings.emailSaved')
-      });
-      setTimeout(() => setAlert(null), 3000);
+      toast.success(t('settings.emailSaved'));
     } catch (error) {
       console.error('Error saving email configuration:', error);
       const errorMessage = error instanceof Error ? error.message : t('settings.emailSaveError');
-      setAlert({
-        type: 'error',
-        message: errorMessage
-      });
-      setTimeout(() => setAlert(null), 3000);
+      toast.error(errorMessage);
     }
   };
 
@@ -254,15 +221,6 @@ export default function SettingsPage() {
           <SettingsIcon className="h-8 w-8" />
           {t('settings.title')}
         </h1>
-
-        {alert && (
-          <Alert
-            type={alert.type}
-            message={alert.message}
-            onClose={() => setAlert(null)}
-            autoClose
-          />
-        )}
 
         <div className="space-y-8">
           <CompanyConfigurationForm

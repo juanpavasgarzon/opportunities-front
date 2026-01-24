@@ -1,7 +1,6 @@
 'use client';
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-import { Alert } from '@/components/ui/Alert';
 import { LoadingState } from '@/components/common/LoadingState';
 import { ErrorState } from '@/components/common/ErrorState';
 import { LogoutSection } from '@/components/profile/LogoutSection';
@@ -20,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { authKeys } from '@/hooks/useAuth';
+import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
   const t = useTranslations();
@@ -35,7 +35,6 @@ export default function ProfilePage() {
     name: '',
     email: ''
   });
-  const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
   const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
   const [showPasswordChangeConfirmModal, setShowPasswordChangeConfirmModal] = useState(false);
@@ -77,11 +76,7 @@ export default function ProfilePage() {
 
   const handleUpdateAccount = async () => {
     if (!formData.name.trim() || !formData.username.trim() || !formData.email.trim()) {
-      setAlert({
-        type: 'error',
-        message: t('profile.allFieldsRequired')
-      });
-      setTimeout(() => setAlert(null), 3000);
+      toast.error(t('profile.allFieldsRequired'));
       return;
     }
 
@@ -107,28 +102,17 @@ export default function ProfilePage() {
         email: formData.email.trim(),
       });
 
-      setAlert({
-        type: 'success',
-        message: t('profile.accountUpdated')
-      });
-      setTimeout(() => setAlert(null), 3000);
+      toast.success(t('profile.accountUpdated'));
     } catch (error) {
       console.error(error);
       // If 401, the API client will handle logout and redirect automatically
       // We just need to show the error message
       if (error instanceof ApiError && error.status === 401) {
-        setAlert({
-          type: 'error',
-          message: error.message || t('profile.sessionExpired')
-        });
+        toast.error(error.message || t('profile.sessionExpired'));
         // Redirect is handled by API client, but we can add a small delay for UX
       } else {
         const errorMessage = error instanceof Error ? error.message : t('profile.errorUpdatingAccount');
-        setAlert({
-          type: 'error',
-          message: errorMessage
-        });
-        setTimeout(() => setAlert(null), 3000);
+        toast.error(errorMessage);
       }
     }
   };
@@ -150,21 +134,13 @@ export default function ProfilePage() {
 
     try {
       await resetPasswordMutation.mutateAsync(pendingPassword);
-      setAlert({
-        type: 'success',
-        message: t('profile.passwordResetSuccess')
-      });
-      setTimeout(() => setAlert(null), 5000);
+      toast.success(t('profile.passwordResetSuccess'));
       // Session will be invalidated by backend, API client will handle redirect
       // Don't close modal here - let the redirect happen
     } catch (error) {
       console.error('Error resetting password:', error);
       const errorMessage = error instanceof Error ? error.message : t('profile.errorResettingPassword');
-      setAlert({
-        type: 'error',
-        message: errorMessage
-      });
-      setTimeout(() => setAlert(null), 3000);
+      toast.error(errorMessage);
       setShowPasswordChangeConfirmModal(false);
       setPendingPassword(null);
     }
@@ -225,15 +201,6 @@ export default function ProfilePage() {
           <UserIcon className="h-8 w-8" />
           {t('profile.title')}
         </h1>
-
-        {alert && (
-          <Alert
-            type={alert.type}
-            message={alert.message}
-            onClose={() => setAlert(null)}
-            autoClose
-          />
-        )}
 
         <div className="space-y-6">
           <UserInfoCard user={user} />
