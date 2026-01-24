@@ -58,7 +58,7 @@
     "email": "E-mail",
     "username": "Nome de usuário",
     "usernameOrEmail": "Nome de usuário ou E-mail",
-    "usernameOrEmailPlaceholder": "Digite seu nome de usuário ou e-mail",
+    "usernameOrEmailPlaceholder": "joao.silva ou usuario@exemplo.com",
     "password": "Senha",
     "loginTitle": "Entrar",
     "loginDescription": "Acesso exclusivo para administração da plataforma. Usuários que desejam se candidatar a oportunidades de emprego não precisam fazer login.",

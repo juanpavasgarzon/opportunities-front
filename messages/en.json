@@ -58,7 +58,7 @@
     "email": "Email",
     "username": "Username",
     "usernameOrEmail": "Username or Email",
-    "usernameOrEmailPlaceholder": "Enter your username or email",
+    "usernameOrEmailPlaceholder": "john.doe or user@example.com",
     "password": "Password",
     "loginTitle": "Login",
     "loginDescription": "Exclusive access for platform administration. Users who wish to apply for job opportunities do not need to log in.",
