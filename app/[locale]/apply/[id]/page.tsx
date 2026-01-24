@@ -6,7 +6,7 @@ import { Alert } from '@/components/ui/Alert';
 import { Button } from '@/components/ui/Button';
 import { useJob } from '@/hooks/useJobs';
 import { applyToJob } from '@/lib/api/jobs';
-import { Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Share2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -120,6 +120,25 @@ export default function ApplyPage() {
   return (
     <div className="min-h-screen bg-gray-900 py-8">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
+        <div className="mb-6 flex items-center justify-between">
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/${locale}`)}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {t('common.goBack')}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleShare}
+            className="flex items-center gap-2"
+          >
+            <Share2 className="h-4 w-4" />
+            {t('common.share')}
+          </Button>
+        </div>
+
         {alert && (
           <div className="mb-6">
             <Alert
@@ -135,8 +154,6 @@ export default function ApplyPage() {
           <ApplicationForm 
             onSubmit={handleSubmit} 
             isSubmitting={isSubmitting}
-            onGoBack={() => router.push(`/${locale}`)}
-            onShare={handleShare}
             onValidationError={(message) => {
               setAlert({
                 type: 'error',

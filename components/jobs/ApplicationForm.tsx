@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { ArrowLeft, CheckCircle2, FileText, Loader2, Share2, Upload } from 'lucide-react';
+import { CheckCircle2, FileText, Loader2, Upload } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRef, useState } from 'react';
 
@@ -14,12 +14,10 @@ interface ApplicationFormProps {
     cv: File;
   }) => Promise<void>;
   isSubmitting: boolean;
-  onGoBack?: () => void;
-  onShare?: () => void;
   onValidationError?: (message: string) => void;
 }
 
-export function ApplicationForm({ onSubmit, isSubmitting, onGoBack, onShare, onValidationError }: ApplicationFormProps) {
+export function ApplicationForm({ onSubmit, isSubmitting, onValidationError }: ApplicationFormProps) {
   const t = useTranslations();
   const locale = useLocale();
   const [name, setName] = useState('');
@@ -256,49 +254,23 @@ export function ApplicationForm({ onSubmit, isSubmitting, onGoBack, onShare, onV
         </div>
       </div>
 
-      <div className="flex justify-between items-center pt-4 border-t border-gray-700">
-        {onGoBack && (
-          <Button
-            variant="outline"
-            type="button"
-            onClick={onGoBack}
-            disabled={isSubmitting}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t('common.goBack')}
-          </Button>
-        )}
-        <div className="flex gap-2 ml-auto">
-          {onShare && (
-            <Button
-              variant="outline"
-              type="button"
-              onClick={onShare}
-              disabled={isSubmitting}
-              className="flex items-center gap-2"
-            >
-              <Share2 className="h-4 w-4" />
-              {t('common.share')}
-            </Button>
+      <div className="flex justify-end pt-4 border-t border-gray-700">
+        <Button
+          variant="primary"
+          type="submit"
+          disabled={isSubmitting || !isFormValid()}
+        >
+          {isSubmitting ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              {t('common.loading')}
+            </>
+          ) : (
+            <>
+              {t('common.submit')} {t('common.application')}
+            </>
           )}
-          <Button
-            variant="primary"
-            type="submit"
-            disabled={isSubmitting || !isFormValid()}
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                {t('common.loading')}
-              </>
-            ) : (
-              <>
-                {t('common.submit')} {t('common.application')}
-              </>
-            )}
-          </Button>
-        </div>
+        </Button>
       </div>
     </form>
   );

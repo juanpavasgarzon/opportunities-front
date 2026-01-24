@@ -16,6 +16,12 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
+ENV TZ=UTC
+
+RUN apk add --no-cache tzdata \
+  && cp /usr/share/zoneinfo/UTC /etc/localtime \
+  && echo "UTC" > /etc/timezone \
+  && apk del tzdata
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs

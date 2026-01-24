@@ -66,12 +66,12 @@ function EditOpportunityContent() {
     <OpportunityFormPageLayout
       alert={alert}
       onAlertClose={() => setAlert(null)}
+      backUrl={`/${locale}/admin/opportunities`}
     >
       <JobForm
         job={job}
         onSubmit={handleSubmit}
         onCancel={() => router.push(`/${locale}/admin/opportunities`)}
-        onGoBack={() => router.push(`/${locale}/admin/opportunities`)}
         isLoading={updateJobMutation.isPending}
         initialAlert={alert}
       />

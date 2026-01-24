@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { JobOpportunity } from '@/lib/types';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 
@@ -13,12 +13,11 @@ interface JobFormProps {
   job?: JobOpportunity | null;
   onSubmit: (data: Partial<JobOpportunity>) => Promise<void>;
   onCancel: () => void;
-  onGoBack?: () => void;
   isLoading?: boolean;
   initialAlert?: { type: 'success' | 'error'; message: string } | null;
 }
 
-export function JobForm({ job, onSubmit, onCancel, onGoBack, isLoading = false, initialAlert = null }: JobFormProps) {
+export function JobForm({ job, onSubmit, onCancel, isLoading = false, initialAlert = null }: JobFormProps) {
   const t = useTranslations();
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(initialAlert);
   const [formData, setFormData] = useState<Partial<JobOpportunity>>(
@@ -171,43 +170,29 @@ export function JobForm({ job, onSubmit, onCancel, onGoBack, isLoading = false, 
             onChange={(e) => setFormData({ ...formData, company_info: e.target.value })}
             rows={4}
           />
-          <div className="flex justify-between items-center pt-4 border-t border-gray-700">
-            {onGoBack && (
-              <Button
-                variant="outline"
-                type="button"
-                onClick={onGoBack}
-                disabled={isLoading}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                {t('common.goBack')}
-              </Button>
-            )}
-            <div className="flex gap-2 ml-auto">
-              <Button
-                variant="outline"
-                type="button"
-                onClick={onCancel}
-                disabled={isLoading}
-              >
-                {t('common.cancel')}
-              </Button>
-              <Button
-                variant="primary"
-                type="submit"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    {t('common.loading')}
-                  </>
-                ) : (
-                  t('common.save')
-                )}
-              </Button>
-            </div>
+          <div className="flex justify-end gap-2 pt-4 border-t border-gray-700">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={onCancel}
+              disabled={isLoading}
+            >
+              {t('common.cancel')}
+            </Button>
+            <Button
+              variant="primary"
+              type="submit"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  {t('common.loading')}
+                </>
+              ) : (
+                t('common.save')
+              )}
+            </Button>
           </div>
         </form>
       </div>

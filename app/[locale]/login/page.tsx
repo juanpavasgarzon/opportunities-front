@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/Input';
 import { useLogin, useMe } from '@/hooks/useAuth';
 import { getCurrentUser, setCurrentUser } from '@/lib/auth';
 import { User } from '@/lib/types';
+import { ArrowLeft } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -85,12 +86,6 @@ export default function LoginPage() {
     }
   }, [mounted, currentUser, isLoadingUser, meError, router, locale]);
 
-  useEffect(() => {
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,8 +125,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center bg-gray-900 py-4 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      <div className="max-w-md w-full space-y-6">
+    <div className="flex items-start justify-center bg-gray-900 pt-20 pb-20 relative">
+      <div className="absolute top-4 left-0 w-full">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/${locale}`)}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            {t('common.goBack')}
+          </Button>
+        </div>
+      </div>
+      <div className="w-full max-w-md space-y-6 mt-4">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-white">
             {t('auth.loginTitle')}
@@ -169,26 +176,15 @@ export default function LoginPage() {
             />
           )}
 
-          <div className="space-y-3">
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              className="w-full"
-              disabled={loginMutation.isPending}
-            >
-              {loginMutation.isPending ? t('common.loading') : t('auth.loginButton')}
-            </Button>
-            <Button
-              type="button"
-              variant="outline"
-              size="lg"
-              className="w-full"
-              onClick={() => router.push(`/${locale}`)}
-            >
-              {t('common.goHome')}
-            </Button>
-          </div>
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            className="w-full"
+            disabled={loginMutation.isPending}
+          >
+            {loginMutation.isPending ? t('common.loading') : t('auth.loginButton')}
+          </Button>
         </form>
       </div>
     </div>
