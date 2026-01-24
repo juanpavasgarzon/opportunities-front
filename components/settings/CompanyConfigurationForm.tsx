@@ -2,9 +2,9 @@
 
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Loader2, Save } from 'lucide-react';
-import Image from 'next/image';
+import { Save } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 
 interface CompanyConfigurationFormProps {
   companyName: string;
@@ -77,7 +77,6 @@ export function CompanyConfigurationForm({
         >
           {isLoading ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin" />
               {t('common.loading')}
             </>
           ) : (

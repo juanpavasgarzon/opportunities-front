@@ -1,15 +1,15 @@
 'use client';
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
+import { LoadingState } from '@/components/common/LoadingState';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { DataTable } from '@/components/ui/DataTable';
 import { ResetPasswordModal } from '@/components/ui/ResetPasswordModal';
-import { LoadingState } from '@/components/common/LoadingState';
+import { UserModal } from '@/components/users/UserModal';
 import { UsersHeader } from '@/components/users/UsersHeader';
 import { UsersSearchBar } from '@/components/users/UsersSearchBar';
 import { UsersTableActions } from '@/components/users/UsersTableActions';
-import { UserModal } from '@/components/users/UserModal';
-import { useActivateUser, useCreateUser, useDeactivateUser, useDeleteUser, useResetPassword, useUsers } from '@/hooks/useUsers';
+import { useActivateUser, useCreateUser, useDeactivateUser, useDeleteUser, useResetPassword, useUpdateUser, useUsers } from '@/hooks/useUsers';
 import { getCurrentUser } from '@/lib/auth';
 import { User } from '@/lib/types';
 import { formatDateLocale } from '@/lib/utils/date';
@@ -45,6 +45,7 @@ export default function UsersPage() {
   const deleteUserMutation = useDeleteUser();
   const resetPasswordMutation = useResetPassword();
   const createUserMutation = useCreateUser();
+  const updateUserMutation = useUpdateUser();
   const [confirmModal, setConfirmModal] = useState<{
     isOpen: boolean;
     type: 'inactivate' | 'delete';
@@ -62,6 +63,10 @@ export default function UsersPage() {
     user: null
   });
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editModal, setEditModal] = useState<{ isOpen: boolean; user: User | null }>({
+    isOpen: false,
+    user: null
+  });
   const [currentUser, setCurrentUser] = useState<ReturnType<typeof getCurrentUser> | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -127,15 +132,58 @@ export default function UsersPage() {
     setShowCreateModal(true);
   };
 
-  const handleSave = async (userData: Omit<User, 'id' | 'created_at' | 'updated_at'> & { password: string }) => {
+  const handleEdit = (user: User) => {
+    setEditModal({
+      isOpen: true,
+      user
+    });
+  };
+
+  const handleCreateUser = async (userData: Omit<User, 'id' | 'created_at' | 'updated_at'> & { password?: string }) => {
     try {
       const { password, ...userWithoutPassword } = userData;
-      await createUserMutation.mutateAsync({ ...userWithoutPassword, password });
+      if (!password) {
+        toast.error(t('users.passwordRequired'));
+        return;
+      }
+      await createUserMutation.mutateAsync({
+        full_name: userWithoutPassword.full_name || userWithoutPassword.name || '',
+        username: userWithoutPassword.username,
+        email: userWithoutPassword.email,
+        role: userWithoutPassword.role,
+        active: userWithoutPassword.active,
+        password
+      });
       toast.success(t('users.userCreated'));
       setShowCreateModal(false);
     } catch (error) {
       console.error('Error creating user:', error);
-      toast.error(t('users.userCreateError'));
+      const errorMessage = error instanceof Error ? error.message : t('users.userCreateError');
+      toast.error(errorMessage);
+    }
+  };
+
+  const handleUpdateUser = async (userData: Omit<User, 'id' | 'created_at' | 'updated_at'>) => {
+    if (!editModal.user) {
+      return;
+    }
+
+    try {
+      await updateUserMutation.mutateAsync({
+        id: String(editModal.user.id),
+        data: {
+          full_name: userData.full_name || userData.name,
+          username: userData.username,
+          email: userData.email,
+          role: userData.role
+        }
+      });
+      toast.success(t('users.userUpdated', { action: t('common.updated') }));
+      setEditModal({ isOpen: false, user: null });
+    } catch (error) {
+      console.error('Error updating user:', error);
+      const errorMessage = error instanceof Error ? error.message : t('users.userUpdateError');
+      toast.error(errorMessage);
     }
   };
 
@@ -261,9 +309,9 @@ export default function UsersPage() {
     }
   ];
 
-  const isActionLoading = deactivateUserMutation.isPending || 
-    activateUserMutation.isPending || 
-    resetPasswordMutation.isPending || 
+  const isActionLoading = deactivateUserMutation.isPending ||
+    activateUserMutation.isPending ||
+    resetPasswordMutation.isPending ||
     deleteUserMutation.isPending;
 
   return (
@@ -288,32 +336,31 @@ export default function UsersPage() {
           <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
             <div className="overflow-x-auto overflow-y-visible">
               <DataTable
-              data={users}
-              columns={columns}
-              pageSize={pageSize}
-              currentPage={currentPage}
-              totalCount={totalCount}
-              onPageChange={setCurrentPage}
-              onSortChange={(key, direction) => {
-                setSortConfig(direction ? { key, direction } : null);
-                setCurrentPage(1);
-              }}
-              sortConfig={sortConfig}
-              serverSide={true}
-              actions={(user) => {
-                const isCurrentUser = currentUser && (String(user.id) === String(currentUser.id) || user.email === currentUser.email);
-                return (
-                  <UsersTableActions
-                    user={user}
-                    isCurrentUser={!!isCurrentUser}
-                    isLoading={isActionLoading}
-                    onInactivate={handleInactivate}
-                    onResetPassword={handleResetPassword}
-                    onDelete={handleDelete}
-                  />
-                );
-              }}
-            />
+                data={users}
+                columns={columns}
+                pageSize={pageSize}
+                currentPage={currentPage}
+                totalCount={totalCount}
+                onPageChange={setCurrentPage}
+                onSortChange={(key, direction) => {
+                  setSortConfig(direction ? { key, direction } : null);
+                  setCurrentPage(1);
+                }}
+                sortConfig={sortConfig}
+                serverSide={true}
+                actions={(user) => {
+                  return (
+                    <UsersTableActions
+                      user={user}
+                      isLoading={isActionLoading}
+                      onEdit={handleEdit}
+                      onInactivate={handleInactivate}
+                      onResetPassword={handleResetPassword}
+                      onDelete={handleDelete}
+                    />
+                  );
+                }}
+              />
             </div>
           </div>
         )}
@@ -348,9 +395,16 @@ export default function UsersPage() {
         />
 
         <UserModal
-          onSave={handleSave}
+          onSave={handleCreateUser}
           onClose={() => setShowCreateModal(false)}
           isOpen={showCreateModal}
+        />
+        <UserModal
+          onSave={handleUpdateUser}
+          onClose={() => setEditModal({ isOpen: false, user: null })}
+          isOpen={editModal.isOpen}
+          user={editModal.user}
+          isEdit={true}
         />
       </div>
     </ProtectedRoute>

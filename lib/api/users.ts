@@ -1,4 +1,4 @@
-import { User } from '../types';
+import { User, UserRole } from '../types';
 import { apiDelete, apiGet, apiPost, apiPut } from './client';
 
 export interface PaginationParams {
@@ -23,7 +23,7 @@ interface ApiPaginatedResponse {
     full_name: string;
     username: string;
     email: string;
-    role: 'owner' | 'admin';
+    role: UserRole;
     active: boolean;
     created_at: string;
     updated_at: string;
@@ -63,11 +63,10 @@ export async function getUsers(params?: PaginationParams): Promise<PaginatedResp
 
 
 interface UpdateUserRequest {
+  full_name?: string;
   username?: string;
   email?: string;
-  password?: string;
-  role?: 'owner' | 'admin';
-  active?: boolean;
+  role?: UserRole;
 }
 
 interface UpdateUserResponse {
@@ -75,7 +74,7 @@ interface UpdateUserResponse {
   full_name: string;
   username: string;
   email: string;
-  role: 'owner' | 'admin';
+  role: UserRole;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -83,7 +82,12 @@ interface UpdateUserResponse {
 
 export interface UpdateUserParams {
   id: string;
-  data: Partial<User>;
+  data: {
+    full_name?: string;
+    username?: string;
+    email?: string;
+    role?: UserRole;
+  };
 }
 
 export interface CreateUserParams extends Omit<User, 'id' | 'created_at' | 'updated_at'> {
@@ -95,22 +99,19 @@ export interface ResetUserPasswordParams {
   password: string;
 }
 
-export async function updateUser(id: string, user: Partial<User>): Promise<User> {
+export async function updateUser(id: string, user: UpdateUserParams['data']): Promise<User> {
   const requestBody: UpdateUserRequest = {};
+  if (user.full_name !== undefined) {
+    requestBody.full_name = user.full_name;
+  }
   if (user.username !== undefined) {
     requestBody.username = user.username;
   }
   if (user.email !== undefined) {
     requestBody.email = user.email;
   }
-  if ('password' in user && user.password !== undefined) {
-    requestBody.password = user.password as string;
-  }
   if (user.role !== undefined && (user.role === 'owner' || user.role === 'admin')) {
     requestBody.role = user.role;
-  }
-  if (user.active !== undefined) {
-    requestBody.active = user.active;
   }
 
   const apiResponse = await apiPut<UpdateUserResponse>(`/users/${id}`, requestBody);
@@ -132,8 +133,8 @@ export async function deactivateUser(id: string): Promise<void> {
   await apiPost<void>(`/users/${id}/deactivate`);
 }
 
-export async function activateUser(id: string): Promise<User> {
-  return updateUser(id, { active: true });
+export async function activateUser(id: string): Promise<void> {
+  await apiPost<void>(`/users/${id}/activate`);
 }
 
 export async function deleteUser(id: string): Promise<void> {
@@ -151,7 +152,7 @@ interface CreateUserRequest {
   username: string;
   email: string;
   password: string;
-  role: 'owner' | 'admin';
+  role: UserRole;
 }
 
 interface CreateUserResponse {
@@ -159,7 +160,7 @@ interface CreateUserResponse {
   full_name: string;
   username: string;
   email: string;
-  role: 'owner' | 'admin';
+  role: UserRole;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -167,7 +168,7 @@ interface CreateUserResponse {
 
 export async function createUser(user: CreateUserParams): Promise<User> {
   const requestBody: CreateUserRequest = {
-    full_name: user.name || user.full_name || '',
+    full_name: user.full_name || user.name || '',
     username: user.username,
     email: user.email,
     password: user.password,

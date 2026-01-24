@@ -2,29 +2,47 @@
 
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { User } from '@/lib/types';
+import { User, UserRole } from '@/lib/types';
 import { Eye, EyeOff, RefreshCw, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
 interface UserModalProps {
-  onSave: (data: Omit<User, 'id' | 'created_at' | 'updated_at'> & { password: string }) => void;
+  onSave: (data: Omit<User, 'id' | 'created_at' | 'updated_at'> & { password?: string }) => void;
   onClose: () => void;
   isOpen: boolean;
+  user?: User | null;
+  isEdit?: boolean;
 }
 
-export function UserModal({ onSave, onClose, isOpen }: UserModalProps) {
+export function UserModal({ onSave, onClose, isOpen, user, isEdit = false }: UserModalProps) {
   const t = useTranslations();
   const modalRef = useRef<HTMLDivElement>(null);
-  const [formData, setFormData] = useState<Omit<User, 'id' | 'created_at' | 'updated_at'> & { password: string }>({
-    username: '',
-    name: '',
-    email: '',
-    role: 'admin',
-    active: true,
-    password: ''
-  });
+
+  const getInitialFormData = (): Omit<User, 'id' | 'created_at' | 'updated_at'> & { password?: string } => {
+    if (isEdit && user) {
+      return {
+        username: user.username || '',
+        name: user.full_name || user.name || '',
+        email: user.email || '',
+        role: (user.role === 'owner' || user.role === 'admin') ? user.role : 'admin',
+        active: user.active ?? true,
+        password: ''
+      };
+    }
+    return {
+      username: '',
+      name: '',
+      email: '',
+      role: 'admin' as const,
+      active: true,
+      password: ''
+    };
+  };
+
+  const [formData, setFormData] = useState<Omit<User, 'id' | 'created_at' | 'updated_at'> & { password?: string }>(getInitialFormData);
   const [showPassword, setShowPassword] = useState(false);
+  const prevIsOpenRef = useRef(isOpen);
 
   useEffect(() => {
     if (isOpen) {
@@ -38,18 +56,12 @@ export function UserModal({ onSave, onClose, isOpen }: UserModalProps) {
   }, [isOpen]);
 
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        setFormData({
-          username: '',
-          name: '',
-          email: '',
-          role: 'admin',
-          active: true,
-          password: ''
-        });
-      }, 0);
+    if (isOpen && !prevIsOpenRef.current) {
+      const initialFormData = getInitialFormData();
+      setFormData(initialFormData);
     }
+    prevIsOpenRef.current = isOpen;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
   const generateSecurePassword = () => {
@@ -112,7 +124,7 @@ export function UserModal({ onSave, onClose, isOpen }: UserModalProps) {
       <div ref={modalRef} className="bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full border border-gray-700 animate-in zoom-in-95 duration-200">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold text-white">
-            {t('common.create')} {t('users.title')}
+            {isEdit ? t('common.update') : t('common.create')} {t('users.title')}
           </h2>
           <button
             onClick={onClose}
@@ -140,46 +152,48 @@ export function UserModal({ onSave, onClose, isOpen }: UserModalProps) {
             onChange={(e) => setFormData({ ...formData, email: e.target.value })}
             required
           />
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              {t('users.password')}
-            </label>
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                  className="pr-10"
-                />
-                <button
+          {!isEdit && (
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                {t('users.password')}
+              </label>
+              <div className="flex gap-2">
+                <div className="flex-1 relative">
+                  <Input
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password || ''}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    required
+                    className="pr-10"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
+                    title={showPassword ? t('users.hidePassword') : t('users.showPassword')}
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
+                </div>
+                <Button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
-                  title={showPassword ? t('users.hidePassword') : t('users.showPassword')}
+                  variant="outline"
+                  onClick={handleGeneratePassword}
+                  className="flex items-center gap-2"
+                  title={t('users.generatePassword')}
                 >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
+                  <RefreshCw size={16} />
+                </Button>
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleGeneratePassword}
-                className="flex items-center gap-2"
-                title={t('users.generatePassword')}
-              >
-                <RefreshCw size={16} />
-              </Button>
             </div>
-          </div>
+          )}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               {t('users.role')}
             </label>
             <select
               value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value as 'owner' | 'admin' })}
+              onChange={(e) => setFormData({ ...formData, role: e.target.value as UserRole })}
               className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
               required
             >

@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { CheckCircle2, FileText, Loader2, Upload } from 'lucide-react';
+import { CheckCircle2, FileText, Upload } from 'lucide-react';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRef, useState } from 'react';
 
@@ -262,7 +262,6 @@ export function ApplicationForm({ onSubmit, isSubmitting, onValidationError }: A
         >
           {isSubmitting ? (
             <>
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
               {t('common.loading')}
             </>
           ) : (

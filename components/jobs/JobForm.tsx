@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { Textarea } from '@/components/ui/Textarea';
 import { JobOpportunity } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -167,7 +166,6 @@ export function JobForm({ job, onSubmit, onCancel, isLoading = false }: JobFormP
           >
             {isLoading ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 {t('common.loading')}
               </>
             ) : (

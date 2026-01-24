@@ -1,3 +1,4 @@
+import { UserRole } from '../types';
 import { apiGet, apiPost, apiPut } from './client';
 
 export interface LoginRequest {
@@ -10,7 +11,7 @@ export interface LoginResponse {
   full_name: string;
   username: string;
   email: string;
-  role: 'owner' | 'admin' | 'guest';
+  role: UserRole;
   active: boolean;
   created_at: string;
   updated_at: string;

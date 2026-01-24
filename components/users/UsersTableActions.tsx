@@ -2,13 +2,13 @@
 
 import { Button } from '@/components/ui/Button';
 import { User } from '@/lib/types';
-import { Key, Loader2, Shield, ShieldOff, Trash2 } from 'lucide-react';
+import { Edit, Key, Loader2, Shield, ShieldOff, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface UsersTableActionsProps {
   user: User;
-  isCurrentUser: boolean;
   isLoading: boolean;
+  onEdit: (user: User) => void;
   onInactivate: (user: User) => void;
   onResetPassword: (user: User) => void;
   onDelete: (user: User) => void;
@@ -16,8 +16,8 @@ interface UsersTableActionsProps {
 
 export function UsersTableActions({
   user,
-  isCurrentUser,
   isLoading,
+  onEdit,
   onInactivate,
   onResetPassword,
   onDelete
@@ -27,6 +27,19 @@ export function UsersTableActions({
   return (
     <div className="flex gap-2">
       <Button
+        variant="outline"
+        size="sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          onEdit(user);
+        }}
+        className="flex items-center justify-center p-1.5"
+        disabled={isLoading}
+        title={t('common.edit')}
+      >
+        <Edit size={16} />
+      </Button>
+      <Button
         variant={user.active ? 'danger' : 'secondary'}
         size="sm"
         onClick={(e) => {
@@ -34,8 +47,8 @@ export function UsersTableActions({
           onInactivate(user);
         }}
         className="flex items-center justify-center p-1.5"
-        disabled={isCurrentUser || isLoading}
-        title={isCurrentUser ? t('users.cannotModifySelf') : (user.active ? t('common.inactivate') : t('common.activate'))}
+        disabled={isLoading}
+        title={user.active ? t('common.inactivate') : t('common.activate')}
       >
         {user.active ? <ShieldOff size={16} /> : <Shield size={16} />}
       </Button>
@@ -47,8 +60,8 @@ export function UsersTableActions({
           onResetPassword(user);
         }}
         className="flex items-center justify-center p-1.5"
-        disabled={isCurrentUser || isLoading}
-        title={isCurrentUser ? t('users.cannotModifySelf') : t('common.resetPassword')}
+        disabled={isLoading}
+        title={t('common.resetPassword')}
       >
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -64,8 +77,8 @@ export function UsersTableActions({
           onDelete(user);
         }}
         className="flex items-center justify-center p-1.5"
-        disabled={isCurrentUser || isLoading}
-        title={isCurrentUser ? t('users.cannotDeleteSelf') : t('common.delete')}
+        disabled={isLoading}
+        title={t('common.delete')}
       >
         {isLoading ? (
           <Loader2 className="h-4 w-4 animate-spin" />
