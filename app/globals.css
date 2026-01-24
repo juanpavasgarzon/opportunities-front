@@ -137,3 +137,7 @@ a, button, input, select, textarea {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+body.modal-open {
+  overflow: hidden !important;
+}
