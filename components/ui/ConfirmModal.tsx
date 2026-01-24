@@ -13,6 +13,7 @@ interface ConfirmModalProps {
   confirmText?: string;
   cancelText?: string;
   variant?: 'danger' | 'warning' | 'info';
+  closeOnConfirm?: boolean; // If false, modal won't close automatically after confirm
 }
 
 export function ConfirmModal({
@@ -23,7 +24,8 @@ export function ConfirmModal({
   message,
   confirmText = 'Confirmar',
   cancelText = 'Cancelar',
-  variant = 'danger'
+  variant = 'danger',
+  closeOnConfirm = true
 }: ConfirmModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
 
@@ -117,7 +119,9 @@ export function ConfirmModal({
               variant="primary"
               onClick={() => {
                 onConfirm();
-                onClose();
+                if (closeOnConfirm) {
+                  onClose();
+                }
               }}
               className={buttonVariants[variant]}
             >

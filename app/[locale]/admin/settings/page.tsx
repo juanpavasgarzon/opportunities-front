@@ -2,14 +2,15 @@
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Alert } from '@/components/ui/Alert';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { LoadingState } from '@/components/common/LoadingState';
+import { CompanyConfigurationForm } from '@/components/settings/CompanyConfigurationForm';
+import { EmailConfigurationForm } from '@/components/settings/EmailConfigurationForm';
+import { EmailTestSection } from '@/components/settings/EmailTestSection';
 import { useConfiguration, useUpdateCompanyConfiguration, useUpdateEmailConfiguration } from '@/hooks/useConfiguration';
 import { testEmailConnection } from '@/lib/api/email';
 import { getCurrentUser } from '@/lib/auth';
-import { Loader2, Mail, Save, Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
@@ -118,9 +119,7 @@ export default function SettingsPage() {
   if (isLoadingConfig) {
     return (
       <ProtectedRoute requiredRole={['owner']}>
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-        </div>
+        <LoadingState />
       </ProtectedRoute>
     );
   }
@@ -266,169 +265,31 @@ export default function SettingsPage() {
         )}
 
         <div className="space-y-8">
-          <div className="bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              {t('settings.company')}
-            </h2>
-            <div className="space-y-6">
-              <div>
-                <Input
-                  label={t('settings.companyName')}
-                  value={companyName}
-                  onChange={(e) => setCompanyName(e.target.value)}
-                  placeholder={t('settings.companyNamePlaceholder')}
-                />
-              </div>
+          <CompanyConfigurationForm
+            companyName={companyName}
+            logo={logo}
+            isLoading={updateCompanyMutation.isPending}
+            onCompanyNameChange={setCompanyName}
+            onLogoUpload={handleLogoUpload}
+            onSave={handleCompanySave}
+          />
 
-              <div>
-                <label className="block text-sm font-medium mb-2 text-gray-300">
-                  {t('settings.logo')}
-                </label>
-                {logo && (
-                  <div className="mb-4">
-                    <p className="text-sm text-gray-400 mb-2">
-                      {t('settings.currentLogo')}:
-                    </p>
-                    <div className="relative h-20 w-auto">
-                      <Image
-                        src={logo}
-                        alt="Logo"
-                        width={80}
-                        height={80}
-                        className="object-contain"
-                        unoptimized
-                      />
-                    </div>
-                  </div>
-                )}
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleLogoUpload}
-                  className="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-900 file:text-blue-200 hover:file:bg-blue-800"
-                />
-              </div>
+          <EmailConfigurationForm
+            recipients={emailConfig.recipients}
+            cc={emailConfig.cc}
+            bcc={emailConfig.bcc}
+            isLoading={updateEmailMutation.isPending}
+            onRecipientsChange={(value) => setEmailConfig({ ...emailConfig, recipients: value })}
+            onCcChange={(value) => setEmailConfig({ ...emailConfig, cc: value })}
+            onBccChange={(value) => setEmailConfig({ ...emailConfig, bcc: value })}
+            onSave={handleEmailSave}
+          />
 
-              <Button
-                variant="primary"
-                onClick={handleCompanySave}
-                disabled={updateCompanyMutation.isPending}
-                className="flex items-center gap-2"
-              >
-                {updateCompanyMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {t('common.loading')}
-                  </>
-                ) : (
-                  <>
-                    <Save size={20} />
-                    {t('common.save')}
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          <div className="bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              {t('settings.email')}
-            </h2>
-            <div className="space-y-4">
-              <Input
-                label={t('settings.recipients')}
-                type="email"
-                value={emailConfig.recipients}
-                onChange={(e) => setEmailConfig({ ...emailConfig, recipients: e.target.value })}
-                placeholder="recipient1@example.com, recipient2@example.com"
-              />
-              <Input
-                label={t('settings.cc')}
-                type="email"
-                value={emailConfig.cc}
-                onChange={(e) => setEmailConfig({ ...emailConfig, cc: e.target.value })}
-                placeholder="cc1@example.com, cc2@example.com"
-              />
-              <Input
-                label={t('settings.bcc')}
-                type="email"
-                value={emailConfig.bcc}
-                onChange={(e) => setEmailConfig({ ...emailConfig, bcc: e.target.value })}
-                placeholder="bcc1@example.com, bcc2@example.com"
-              />
-              <Button
-                variant="primary"
-                onClick={handleEmailSave}
-                disabled={updateEmailMutation.isPending}
-                className="flex items-center gap-2"
-              >
-                {updateEmailMutation.isPending ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {t('common.loading')}
-                  </>
-                ) : (
-                  <>
-                    <Save size={20} />
-                    {t('common.save')}
-                  </>
-                )}
-              </Button>
-            </div>
-          </div>
-
-          <div className="bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-              <Mail className="h-5 w-5" />
-              {t('settings.emailTest')}
-            </h2>
-            <div className="space-y-4">
-              <p className="text-sm text-gray-400">
-                {t('settings.emailTestDescription')}
-              </p>
-              <Button
-                variant="outline"
-                onClick={handleTestConnection}
-                disabled={testingConnection}
-                className="flex items-center gap-2"
-              >
-                {testingConnection ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    {t('settings.testingConnection')}
-                  </>
-                ) : (
-                  <>
-                    <Mail size={20} />
-                    {t('settings.testConnection')}
-                  </>
-                )}
-              </Button>
-              {testResult && (
-                <div className={`p-4 rounded-lg border ${testResult.success
-                  ? 'bg-green-500/10 border-green-500/50'
-                  : 'bg-red-500/10 border-red-500/50'
-                  }`}>
-                  <div className="flex items-start gap-3">
-                    <div className={`flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5 ${testResult.success ? 'bg-green-500' : 'bg-red-500'
-                      }`}>
-                      {testResult.success ? (
-                        <span className="text-white text-xs">✓</span>
-                      ) : (
-                        <span className="text-white text-xs">✕</span>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <p className={`text-sm font-medium ${testResult.success ? 'text-green-400' : 'text-red-400'
-                        }`}>
-                        {testResult.success ? t('settings.testSuccess') : t('settings.testFailed')}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <EmailTestSection
+            testingConnection={testingConnection}
+            testResult={testResult}
+            onTest={handleTestConnection}
+          />
         </div>
       </div>
     </ProtectedRoute>

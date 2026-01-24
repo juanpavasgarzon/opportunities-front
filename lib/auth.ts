@@ -26,6 +26,30 @@ export function setCurrentUser(user: User): void {
   }
 }
 
+export function clearAuth(): void {
+  if (typeof window !== 'undefined') {
+    // Save any locale-related keys (next-intl typically uses cookies, but we preserve any localStorage locale)
+    const localeKeys = ['NEXT_LOCALE', 'locale', 'next-intl-locale'];
+    const savedLocale: Record<string, string> = {};
+    localeKeys.forEach(key => {
+      const value = localStorage.getItem(key);
+      if (value) {
+        savedLocale[key] = value;
+      }
+    });
+    
+    // Clear ALL localStorage items
+    localStorage.clear();
+    
+    // Restore locale preferences if they existed
+    Object.entries(savedLocale).forEach(([key, value]) => {
+      localStorage.setItem(key, value);
+    });
+    
+    window.dispatchEvent(new Event('auth-user-removed'));
+  }
+}
+
 export function isAuthorized(user: User | null, requiredRole?: UserRole[]): boolean {
   if (!user || !user.active) {
     return false;

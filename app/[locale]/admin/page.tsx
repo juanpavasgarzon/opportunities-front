@@ -1,5 +1,6 @@
 'use client';
 
+import { LoadingState } from '@/components/common/LoadingState';
 import { getCurrentUser } from '@/lib/auth';
 import { useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
@@ -11,6 +12,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     const user = getCurrentUser();
+    console.log(user);
     
     if (!user || (user.role !== 'owner' && user.role !== 'admin')) {
       router.push(`/${locale}/login`);
@@ -23,9 +25,5 @@ export default function AdminPage() {
     }
   }, [router, locale]);
 
-  return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-gray-400">Redirigiendo...</div>
-    </div>
-  );
+  return <LoadingState />;
 }

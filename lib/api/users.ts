@@ -81,6 +81,20 @@ interface UpdateUserResponse {
   updated_at: string;
 }
 
+export interface UpdateUserParams {
+  id: string;
+  data: Partial<User>;
+}
+
+export interface CreateUserParams extends Omit<User, 'id' | 'created_at' | 'updated_at'> {
+  password: string;
+}
+
+export interface ResetUserPasswordParams {
+  id: string;
+  password: string;
+}
+
 export async function updateUser(id: string, user: Partial<User>): Promise<User> {
   const requestBody: UpdateUserRequest = {};
   if (user.username !== undefined) {
@@ -151,7 +165,7 @@ interface CreateUserResponse {
   updated_at: string;
 }
 
-export async function createUser(user: Omit<User, 'id' | 'created_at' | 'updated_at'> & { password: string }): Promise<User> {
+export async function createUser(user: CreateUserParams): Promise<User> {
   const requestBody: CreateUserRequest = {
     full_name: user.name || user.full_name || '',
     username: user.username,

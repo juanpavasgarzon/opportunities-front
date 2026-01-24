@@ -1,4 +1,5 @@
 import { Header } from '@/components/layout/Header';
+import { Footer } from '@/components/layout/Footer';
 import { PageTransition } from '@/components/layout/PageTransition';
 import { QueryProvider } from '@/components/providers/QueryProvider';
 import { Locale, locales } from '@/i18n';
@@ -28,12 +29,15 @@ export default async function LocaleLayout({
   return (
     <QueryProvider>
       <NextIntlClientProvider messages={messages}>
-        <Header />
-        <main className="min-h-screen bg-gray-900">
-          <PageTransition>
-            {children}
-          </PageTransition>
-        </main>
+        <div className="flex flex-col min-h-screen">
+          <Header />
+          <main className="flex-1 bg-gray-900">
+            <PageTransition>
+              {children}
+            </PageTransition>
+          </main>
+          <Footer />
+        </div>
       </NextIntlClientProvider>
     </QueryProvider>
   );

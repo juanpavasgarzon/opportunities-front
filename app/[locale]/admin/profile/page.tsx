@@ -2,13 +2,19 @@
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Alert } from '@/components/ui/Alert';
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
+import { LoadingState } from '@/components/common/LoadingState';
+import { ErrorState } from '@/components/common/ErrorState';
+import { LogoutSection } from '@/components/profile/LogoutSection';
+import { ResetPasswordSection } from '@/components/profile/ResetPasswordSection';
+import { UpdateAccountSection } from '@/components/profile/UpdateAccountSection';
+import { UserInfoCard } from '@/components/profile/UserInfoCard';
 import { ResetPasswordModal } from '@/components/ui/ResetPasswordModal';
+import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { useLogout, useMe, useResetMyPassword, useUpdateMe } from '@/hooks/useAuth';
+import { ApiError } from '@/lib/api/client';
 import { setCurrentUser } from '@/lib/auth';
 import { User } from '@/lib/types';
-import { Key, Loader2, LogOut, Save, User as UserIcon } from 'lucide-react';
+import { User as UserIcon } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -31,6 +37,11 @@ export default function ProfilePage() {
   });
   const [alert, setAlert] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [showResetPasswordModal, setShowResetPasswordModal] = useState(false);
+  const [showLogoutConfirmModal, setShowLogoutConfirmModal] = useState(false);
+  const [showPasswordChangeConfirmModal, setShowPasswordChangeConfirmModal] = useState(false);
+  const [showAccountUpdateConfirmModal, setShowAccountUpdateConfirmModal] = useState(false);
+  const [pendingPassword, setPendingPassword] = useState<string | null>(null);
+  const [originalUserData, setOriginalUserData] = useState<{ username: string; email: string; full_name: string } | null>(null);
 
   useEffect(() => {
     if (meResponse) {
@@ -54,22 +65,47 @@ export default function ProfilePage() {
           name: user.name || user.full_name || '',
           email: user.email || ''
         });
+        // Store original values for comparison
+        setOriginalUserData({
+          username: user.username || '',
+          email: user.email || '',
+          full_name: user.full_name || ''
+        });
       }, 0);
     }
   }, [meResponse]);
 
   const handleUpdateAccount = async () => {
-    if (!formData.name.trim()) {
+    if (!formData.name.trim() || !formData.username.trim() || !formData.email.trim()) {
       setAlert({
         type: 'error',
-        message: t('profile.nameRequired')
+        message: t('profile.allFieldsRequired')
       });
       setTimeout(() => setAlert(null), 3000);
       return;
     }
 
+    // Check if sensitive data (username or email) has changed
+    const usernameChanged = originalUserData && formData.username.trim() !== originalUserData.username;
+    const emailChanged = originalUserData && formData.email.trim() !== originalUserData.email;
+
+    // If sensitive data changed, show confirmation modal
+    if (usernameChanged || emailChanged) {
+      setShowAccountUpdateConfirmModal(true);
+      return;
+    }
+
+    // If only full_name changed, proceed without confirmation
+    await performAccountUpdate();
+  };
+
+  const performAccountUpdate = async () => {
     try {
-      await updateMeMutation.mutateAsync(formData.name.trim());
+      await updateMeMutation.mutateAsync({
+        full_name: formData.name.trim(),
+        username: formData.username.trim(),
+        email: formData.email.trim(),
+      });
 
       setAlert({
         type: 'success',
@@ -78,24 +114,49 @@ export default function ProfilePage() {
       setTimeout(() => setAlert(null), 3000);
     } catch (error) {
       console.error(error);
-      const errorMessage = error instanceof Error ? error.message : t('profile.errorUpdatingAccount');
-      setAlert({
-        type: 'error',
-        message: errorMessage
-      });
-      setTimeout(() => setAlert(null), 3000);
+      // If 401, the API client will handle logout and redirect automatically
+      // We just need to show the error message
+      if (error instanceof ApiError && error.status === 401) {
+        setAlert({
+          type: 'error',
+          message: error.message || t('profile.sessionExpired')
+        });
+        // Redirect is handled by API client, but we can add a small delay for UX
+      } else {
+        const errorMessage = error instanceof Error ? error.message : t('profile.errorUpdatingAccount');
+        setAlert({
+          type: 'error',
+          message: errorMessage
+        });
+        setTimeout(() => setAlert(null), 3000);
+      }
     }
   };
 
+  const confirmAccountUpdate = async () => {
+    setShowAccountUpdateConfirmModal(false);
+    await performAccountUpdate();
+  };
+
   const handleResetPassword = async (password: string) => {
+    // Show confirmation modal first
+    setPendingPassword(password);
+    setShowPasswordChangeConfirmModal(true);
+    setShowResetPasswordModal(false);
+  };
+
+  const confirmPasswordChange = async () => {
+    if (!pendingPassword) return;
+
     try {
-      await resetPasswordMutation.mutateAsync(password);
+      await resetPasswordMutation.mutateAsync(pendingPassword);
       setAlert({
         type: 'success',
         message: t('profile.passwordResetSuccess')
       });
       setTimeout(() => setAlert(null), 5000);
-      setShowResetPasswordModal(false);
+      // Session will be invalidated by backend, API client will handle redirect
+      // Don't close modal here - let the redirect happen
     } catch (error) {
       console.error('Error resetting password:', error);
       const errorMessage = error instanceof Error ? error.message : t('profile.errorResettingPassword');
@@ -104,16 +165,26 @@ export default function ProfilePage() {
         message: errorMessage
       });
       setTimeout(() => setAlert(null), 3000);
+      setShowPasswordChangeConfirmModal(false);
+      setPendingPassword(null);
     }
   };
 
-  const handleLogout = async () => {
+  const handleLogout = () => {
+    // Show confirmation modal first
+    setShowLogoutConfirmModal(true);
+  };
+
+  const confirmLogout = async () => {
     try {
       await logoutMutation.mutateAsync();
     } catch (error) {
-      console.error('Logout error:', error);
+      // Even if logout API fails, we still clear local auth
+      console.error('Logout error (ignored):', error);
     }
-    router.push(`/${locale}/login`);
+    // clearAuth is already called in the hook's onSuccess/onError
+    // Use replace to avoid adding to history and prevent loops
+    router.replace(`/${locale}/login`);
   };
 
   const user: User | null = meResponse ? {
@@ -131,9 +202,7 @@ export default function ProfilePage() {
   if (isLoadingMe) {
     return (
       <ProtectedRoute requiredRole={['owner', 'admin']}>
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-        </div>
+        <LoadingState />
       </ProtectedRoute>
     );
   }
@@ -141,17 +210,10 @@ export default function ProfilePage() {
   if (meError || !user) {
     return (
       <ProtectedRoute requiredRole={['owner', 'admin']}>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <p className="text-red-400 mb-4">{t('profile.errorLoadingProfile')}</p>
-            <Button
-              variant="outline"
-              onClick={() => queryClient.invalidateQueries({ queryKey: authKeys.me() })}
-            >
-              {t('common.retry')}
-            </Button>
-          </div>
-        </div>
+        <ErrorState
+          message={t('profile.errorLoadingProfile')}
+          onRetry={() => queryClient.invalidateQueries({ queryKey: authKeys.me() })}
+        />
       </ProtectedRoute>
     );
   }
@@ -174,111 +236,22 @@ export default function ProfilePage() {
         )}
 
         <div className="space-y-6">
-          {/* User Information Card */}
-          <div className="bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              {t('profile.userInformation')}
-            </h2>
-            <div className="space-y-4">
-              <div className="flex items-center gap-4">
-                <div className="h-20 w-20 bg-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-                  {user.name ? user.name.charAt(0).toUpperCase() : user.username.charAt(0).toUpperCase()}
-                </div>
-                <div>
-                  <p className="text-lg font-semibold text-white">
-                    {user.name || user.username}
-                  </p>
-                  <p className="text-sm text-gray-400">{user.email}</p>
-                  <p className="text-sm text-gray-400 mt-1">
-                    {t('roles.' + user.role)}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Update Account Section */}
-          <div className="bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              {t('profile.updateAccount')}
-            </h2>
-            <div className="space-y-4">
-              <Input
-                label={t('users.username')}
-                value={formData.username}
-                onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                disabled
-                className="opacity-60 cursor-not-allowed"
-              />
-              <Input
-                label={t('auth.email')}
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                disabled
-                type="email"
-                className="opacity-60 cursor-not-allowed"
-              />
-              <Input
-                label={t('common.name')}
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder={t('profile.namePlaceholder')}
-              />
-              <Button
-                variant="primary"
-                onClick={handleUpdateAccount}
-                disabled={updateMeMutation.isPending || formData.name.trim() === (user.name || user.full_name || '')}
-                className="flex items-center gap-2"
-              >
-                {updateMeMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
-                {t('common.save')}
-              </Button>
-            </div>
-          </div>
-
-          {/* Reset Password Section */}
-          <div className="bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              {t('profile.resetPassword')}
-            </h2>
-            <Button
-              variant="outline"
-              onClick={() => setShowResetPasswordModal(true)}
-              disabled={resetPasswordMutation.isPending}
-              className="flex items-center gap-2"
-            >
-              {resetPasswordMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Key className="h-4 w-4" />
-              )}
-              {t('profile.resetPasswordButton')}
-            </Button>
-          </div>
-
-          {/* Logout Section */}
-          <div className="bg-gray-800 rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold text-white mb-4">
-              {t('profile.session')}
-            </h2>
-            <Button
-              variant="danger"
-              onClick={handleLogout}
-              disabled={logoutMutation.isPending}
-              className="flex items-center gap-2"
-            >
-              {logoutMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <LogOut className="h-4 w-4" />
-              )}
-              {t('common.logout')}
-            </Button>
-          </div>
+          <UserInfoCard user={user} />
+          <UpdateAccountSection
+            formData={formData}
+            user={user}
+            isLoading={updateMeMutation.isPending}
+            onFormDataChange={setFormData}
+            onUpdate={handleUpdateAccount}
+          />
+          <ResetPasswordSection
+            isLoading={resetPasswordMutation.isPending}
+            onResetClick={() => setShowResetPasswordModal(true)}
+          />
+          <LogoutSection
+            isLoading={logoutMutation.isPending}
+            onLogout={handleLogout}
+          />
         </div>
 
         <ResetPasswordModal
@@ -288,6 +261,49 @@ export default function ProfilePage() {
           title={t('profile.resetPassword')}
           username={user.username}
           loading={resetPasswordMutation.isPending}
+          showSessionWarning={true}
+        />
+
+        <ConfirmModal
+          isOpen={showLogoutConfirmModal}
+          onClose={() => setShowLogoutConfirmModal(false)}
+          onConfirm={confirmLogout}
+          title={t('profile.confirmLogout')}
+          message={t('profile.logoutWarning')}
+          confirmText={t('common.logout')}
+          cancelText={t('common.cancel')}
+          variant="warning"
+        />
+
+        <ConfirmModal
+          isOpen={showPasswordChangeConfirmModal}
+          onClose={() => {
+            setShowPasswordChangeConfirmModal(false);
+            setPendingPassword(null);
+            // Reopen the password modal if user cancels
+            if (pendingPassword) {
+              setShowResetPasswordModal(true);
+            }
+          }}
+          onConfirm={confirmPasswordChange}
+          title={t('profile.confirmPasswordChange')}
+          message={t('profile.passwordChangeWarning')}
+          confirmText={t('common.confirm')}
+          cancelText={t('common.cancel')}
+          variant="warning"
+          closeOnConfirm={false}
+        />
+
+        <ConfirmModal
+          isOpen={showAccountUpdateConfirmModal}
+          onClose={() => setShowAccountUpdateConfirmModal(false)}
+          onConfirm={confirmAccountUpdate}
+          title={t('profile.confirmAccountUpdate')}
+          message={t('profile.accountUpdateWarning')}
+          confirmText={t('common.confirm')}
+          cancelText={t('common.cancel')}
+          variant="warning"
+          closeOnConfirm={false}
         />
       </div>
     </ProtectedRoute>

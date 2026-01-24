@@ -2,19 +2,22 @@
 
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { Alert } from '@/components/ui/Alert';
-import { Button } from '@/components/ui/Button';
 import { ConfirmModal } from '@/components/ui/ConfirmModal';
 import { DataTable } from '@/components/ui/DataTable';
-import { Input } from '@/components/ui/Input';
 import { ResetPasswordModal } from '@/components/ui/ResetPasswordModal';
-import { useActivateUser, useCreateUser, useDeactivateUser, useDeleteUser, useResetPassword, useUpdateUser, useUsers } from '@/hooks/useUsers';
+import { LoadingState } from '@/components/common/LoadingState';
+import { UsersHeader } from '@/components/users/UsersHeader';
+import { UsersSearchBar } from '@/components/users/UsersSearchBar';
+import { UsersTableActions } from '@/components/users/UsersTableActions';
+import { UserModal } from '@/components/users/UserModal';
+import { useActivateUser, useCreateUser, useDeactivateUser, useDeleteUser, useResetPassword, useUsers } from '@/hooks/useUsers';
 import { getCurrentUser } from '@/lib/auth';
 import { User } from '@/lib/types';
 import { formatDateLocale } from '@/lib/utils/date';
-import { Eye, EyeOff, Key, Loader2, Plus, RefreshCw, Shield, ShieldOff, Trash2, Users, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export default function UsersPage() {
   const t = useTranslations();
@@ -37,7 +40,6 @@ export default function UsersPage() {
   const users = usersResponse?.data || [];
   const totalCount = usersResponse?.total || 0;
 
-  const updateUserMutation = useUpdateUser();
   const deactivateUserMutation = useDeactivateUser();
   const activateUserMutation = useActivateUser();
   const deleteUserMutation = useDeleteUser();
@@ -90,12 +92,7 @@ export default function UsersPage() {
   if (!mounted) {
     return (
       <ProtectedRoute requiredRole={['owner']}>
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="flex items-center gap-2 text-gray-400">
-            <Loader2 className="h-5 w-5 animate-spin" />
-            <span>{t('common.loading')}</span>
-          </div>
-        </div>
+        <LoadingState message={t('common.loading')} />
       </ProtectedRoute>
     );
   }
@@ -282,23 +279,33 @@ export default function UsersPage() {
       key: 'created_at' as const,
       label: t('users.createdAt'),
       sortable: true,
-      render: (value: unknown) => formatDateLocale(value as string)
+      render: (value: unknown) => (
+        <span className="whitespace-nowrap min-w-[120px] inline-block">
+          {formatDateLocale(value as string)}
+        </span>
+      )
     },
     {
       key: 'updated_at' as const,
       label: t('users.updatedAt'),
       sortable: true,
-      render: (value: unknown) => formatDateLocale(value as string)
+      render: (value: unknown) => (
+        <span className="whitespace-nowrap min-w-[120px] inline-block">
+          {formatDateLocale(value as string)}
+        </span>
+      )
     }
   ];
+
+  const isActionLoading = deactivateUserMutation.isPending || 
+    activateUserMutation.isPending || 
+    resetPasswordMutation.isPending || 
+    deleteUserMutation.isPending;
 
   return (
     <ProtectedRoute requiredRole={['owner']}>
       <div>
-        <h1 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-          <Users className="h-8 w-8" />
-          {t('users.title')}
-        </h1>
+        <UsersHeader />
 
         {alert && (
           <Alert
@@ -309,23 +316,11 @@ export default function UsersPage() {
           />
         )}
 
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <input
-            type="text"
-            placeholder={t('common.searchUsers')}
-            value={inputValue}
-            onChange={(e) => setInputValue(e.target.value)}
-            className="w-full max-w-md px-4 py-2 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-800 text-white"
-          />
-          <Button
-            variant="primary"
-            onClick={handleCreate}
-            className="flex items-center gap-2"
-          >
-            <Plus size={20} />
-            {t('common.create')}
-          </Button>
-        </div>
+        <UsersSearchBar
+          value={inputValue}
+          onChange={setInputValue}
+          onCreateClick={handleCreate}
+        />
 
         {isLoading ? (
           <div className="bg-gray-800 rounded-lg shadow overflow-hidden p-8">
@@ -335,8 +330,9 @@ export default function UsersPage() {
             </div>
           </div>
         ) : (
-          <div className="bg-gray-800 rounded-lg shadow overflow-hidden">
-            <DataTable
+          <div className="bg-gray-800 rounded-lg shadow">
+            <div className="overflow-x-auto overflow-y-visible">
+              <DataTable
               data={users}
               columns={columns}
               pageSize={pageSize}
@@ -352,61 +348,18 @@ export default function UsersPage() {
               actions={(user) => {
                 const isCurrentUser = currentUser && (String(user.id) === String(currentUser.id) || user.email === currentUser.email);
                 return (
-                  <div className="flex gap-2">
-                    <Button
-                      variant={user.active ? 'danger' : 'secondary'}
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleInactivate(user);
-                      }}
-                      className="flex items-center gap-1"
-                      disabled={isCurrentUser || updateUserMutation.isPending || deactivateUserMutation.isPending || activateUserMutation.isPending || resetPasswordMutation.isPending}
-                      title={isCurrentUser ? t('users.cannotModifySelf') : ''}
-                    >
-                      {user.active ? <ShieldOff size={14} /> : <Shield size={14} />}
-                      {user.active ? t('common.inactivate') : t('common.activate')}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleResetPassword(user);
-                      }}
-                      className="flex items-center gap-1"
-                      disabled={isCurrentUser || updateUserMutation.isPending || deactivateUserMutation.isPending || activateUserMutation.isPending || resetPasswordMutation.isPending}
-                      title={isCurrentUser ? t('users.cannotModifySelf') : ''}
-                    >
-                      {resetPasswordMutation.isPending ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Key size={14} />
-                      )}
-                      {t('common.resetPassword')}
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(user);
-                      }}
-                      className="flex items-center gap-1"
-                      disabled={isCurrentUser || deleteUserMutation.isPending || updateUserMutation.isPending || deactivateUserMutation.isPending || activateUserMutation.isPending || resetPasswordMutation.isPending}
-                      title={isCurrentUser ? t('users.cannotDeleteSelf') : ''}
-                    >
-                      {deleteUserMutation.isPending ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Trash2 size={14} />
-                      )}
-                      {t('common.delete')}
-                    </Button>
-                  </div>
+                  <UsersTableActions
+                    user={user}
+                    isCurrentUser={!!isCurrentUser}
+                    isLoading={isActionLoading}
+                    onInactivate={handleInactivate}
+                    onResetPassword={handleResetPassword}
+                    onDelete={handleDelete}
+                  />
                 );
               }}
             />
+            </div>
           </div>
         )}
 
@@ -446,201 +399,5 @@ export default function UsersPage() {
         />
       </div>
     </ProtectedRoute>
-  );
-}
-
-function UserModal({
-  onSave,
-  onClose,
-  isOpen
-}: {
-  onSave: (data: Omit<User, 'id' | 'created_at' | 'updated_at'> & { password: string }) => void;
-  onClose: () => void;
-  isOpen: boolean;
-}) {
-  const t = useTranslations();
-  const modalRef = useRef<HTMLDivElement>(null);
-  const [formData, setFormData] = useState<Omit<User, 'id' | 'created_at' | 'updated_at'> & { password: string }>({
-    username: '',
-    name: '',
-    email: '',
-    role: 'admin',
-    active: true,
-    password: ''
-  });
-  const [showPassword, setShowPassword] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = '';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        setFormData({
-          username: '',
-          name: '',
-          email: '',
-          role: 'admin',
-          active: true,
-          password: ''
-        });
-      }, 0);
-    }
-  }, [isOpen]);
-
-  const generateSecurePassword = () => {
-    const length = 16;
-    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
-    let password = '';
-    password += 'abcdefghijklmnopqrstuvwxyz'[Math.floor(Math.random() * 26)];
-    password += 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 26)];
-    password += '0123456789'[Math.floor(Math.random() * 10)];
-    password += '!@#$%^&*'[Math.floor(Math.random() * 8)];
-
-    for (let i = password.length; i < length; i++) {
-      password += charset[Math.floor(Math.random() * charset.length)];
-    }
-
-    return password.split('').sort(() => Math.random() - 0.5).join('');
-  };
-
-  const handleGeneratePassword = () => {
-    const newPassword = generateSecurePassword();
-    setFormData({ ...formData, password: newPassword });
-  };
-
-  useEffect(() => {
-    if (!isOpen) {
-      return;
-    }
-
-    const handleClickOutside = (event: MouseEvent) => {
-      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
-        onClose();
-      }
-    };
-
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleEscape);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleEscape);
-    };
-  }, [isOpen, onClose]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave(formData);
-  };
-
-  if (!isOpen) {
-    return null;
-  }
-
-  return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      <div ref={modalRef} className="bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full border border-gray-700 animate-in zoom-in-95 duration-200">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-white">
-            {t('common.create')} {t('users.title')}
-          </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-          >
-            <X className="h-5 w-5 text-gray-400" />
-          </button>
-        </div>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <Input
-            label={t('common.name')}
-            value={formData.name || ''}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          />
-          <Input
-            label={t('users.username')}
-            value={formData.username}
-            onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-            required
-          />
-          <Input
-            label={t('auth.email')}
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            required
-          />
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              {t('users.password')}
-            </label>
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <Input
-                  type={showPassword ? 'text' : 'password'}
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  required
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors"
-                  title={showPassword ? t('users.hidePassword') : t('users.showPassword')}
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleGeneratePassword}
-                className="flex items-center gap-2"
-                title={t('users.generatePassword')}
-              >
-                <RefreshCw size={16} />
-              </Button>
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              {t('users.role')}
-            </label>
-            <select
-              value={formData.role}
-              onChange={(e) => setFormData({ ...formData, role: e.target.value as 'owner' | 'admin' })}
-              className="w-full px-3 py-2 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-700 text-white"
-              required
-            >
-              <option value="owner">{t('roles.owner')}</option>
-              <option value="admin">{t('roles.admin')}</option>
-            </select>
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" type="button" onClick={onClose}>
-              {t('common.cancel')}
-            </Button>
-            <Button variant="primary" type="submit">
-              {t('common.save')}
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
   );
 }

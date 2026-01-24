@@ -188,6 +188,11 @@ interface UpdateJobRequest {
   post_date?: string | null;
 }
 
+export interface UpdateJobParams {
+  id: string;
+  data: Partial<JobOpportunity>;
+}
+
 export async function updateJob(id: string, job: Partial<JobOpportunity>): Promise<JobOpportunity> {
   const requestBody: UpdateJobRequest = {};
   if (job.title !== undefined) {

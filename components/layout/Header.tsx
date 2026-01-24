@@ -153,6 +153,17 @@ export function Header() {
     }, 150);
   };
 
+  const handleProfileClick = () => {
+    if(!user) {
+      return;
+    }
+
+    if (user.role === 'owner') {
+      router.push(`/${locale}/admin/users`);
+    } else {
+      router.push(`/${locale}/admin/opportunities`);
+    }
+  };
 
   const languages = [
     { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -270,11 +281,7 @@ export function Header() {
 
             {user && !isAdminPage ? (
               <button
-                onClick={() => {
-                  if (user.role === 'owner' || user.role === 'admin') {
-                    router.push(`/${locale}/admin/opportunities`);
-                  }
-                }}
+                onClick={handleProfileClick}
                 className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-800 transition-all duration-200 hover:scale-105"
               >
                 <User className="h-5 w-5 text-gray-300" />

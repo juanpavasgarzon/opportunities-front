@@ -1,5 +1,4 @@
-import { activateUser, createUser, deactivateUser, deleteUser, getUsers, resetUserPassword, updateUser } from '@/lib/api/users';
-import { User } from '@/lib/types';
+import { activateUser, createUser, deactivateUser, deleteUser, getUsers, resetUserPassword, updateUser, UpdateUserParams, CreateUserParams, ResetUserPasswordParams } from '@/lib/api/users';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { PaginationParams } from '@/lib/api/users';
@@ -24,8 +23,7 @@ export function useUpdateUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<User> }) =>
-      updateUser(id, data),
+    mutationFn: ({ id, data }: UpdateUserParams) => updateUser(id, data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
       queryClient.invalidateQueries({ queryKey: userKeys.detail(String(data.id)) });
@@ -57,8 +55,7 @@ export function useActivateUser() {
 
 export function useResetPassword() {
   return useMutation({
-    mutationFn: ({ id, password }: { id: string; password: string }) => 
-      resetUserPassword(id, password),
+    mutationFn: ({ id, password }: ResetUserPasswordParams) => resetUserPassword(id, password),
   });
 }
 
@@ -66,8 +63,7 @@ export function useCreateUser() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (user: Omit<User, 'id' | 'created_at' | 'updated_at'> & { password: string }) =>
-      createUser(user),
+    mutationFn: (user: CreateUserParams) => createUser(user),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: userKeys.lists() });
     },

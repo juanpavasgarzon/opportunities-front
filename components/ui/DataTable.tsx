@@ -120,31 +120,34 @@ export function DataTable<T extends { id: string | number }>({
 
   return (
     <div className="flex flex-col">
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overflow-y-visible">
         <table className="min-w-full divide-y divide-gray-700">
           <thead className="bg-gray-800">
             <tr>
               {actions && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                  {actionsLabel ?? t('common.actions')}
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider w-24 whitespace-nowrap">
+                  <span className="whitespace-nowrap">{actionsLabel ?? t('common.actions')}</span>
                 </th>
               )}
-              {columns.map((column) => (
-                <th
-                  key={String(column.key)}
-                  className={`px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider ${
-                    column.sortable ? 'cursor-pointer hover:bg-gray-700' : ''
-                  }`}
-                  onClick={() => column.sortable && handleSort(column.key)}
-                >
-                  {column.label}
-                  {column.sortable && sortConfig?.key === column.key && (
-                    <span className="ml-1">
-                      {sortConfig.direction === 'asc' ? '↑' : '↓'}
-                    </span>
-                  )}
-                </th>
-              ))}
+              {columns.map((column) => {
+                const isDateColumn = column.key === 'created_at' || column.key === 'updated_at';
+                return (
+                  <th
+                    key={String(column.key)}
+                    className={`px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider ${
+                      column.sortable ? 'cursor-pointer hover:bg-gray-700' : ''
+                    } ${isDateColumn ? 'min-w-[140px]' : ''}`}
+                    onClick={() => column.sortable && handleSort(column.key)}
+                  >
+                    {column.label}
+                    {column.sortable && sortConfig?.key === column.key && (
+                      <span className="ml-1">
+                        {sortConfig.direction === 'asc' ? '↑' : '↓'}
+                      </span>
+                    )}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody className="bg-gray-900 divide-y divide-gray-700">
@@ -166,7 +169,7 @@ export function DataTable<T extends { id: string | number }>({
                 >
                   {actions && (
                     <td
-                      className="px-6 py-4 whitespace-nowrap text-sm"
+                      className="px-6 py-4 whitespace-nowrap text-sm w-24"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {actions(row)}

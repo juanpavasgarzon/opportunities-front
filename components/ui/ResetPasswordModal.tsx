@@ -13,6 +13,7 @@ interface ResetPasswordModalProps {
   title?: string;
   username?: string;
   loading?: boolean;
+  showSessionWarning?: boolean; // Show warning about session being closed (for own password change)
 }
 
 export function ResetPasswordModal({
@@ -21,7 +22,8 @@ export function ResetPasswordModal({
   onConfirm,
   title,
   username,
-  loading = false
+  loading = false,
+  showSessionWarning = false
 }: ResetPasswordModalProps) {
   const t = useTranslations();
   const modalRef = useRef<HTMLDivElement>(null);
@@ -150,6 +152,14 @@ export function ResetPasswordModal({
               <X className="h-5 w-5 text-gray-400" />
             </button>
           </div>
+
+          {showSessionWarning && (
+            <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+              <p className="text-yellow-400 text-sm whitespace-pre-line">
+                {t('profile.passwordChangeWarning')}
+              </p>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>

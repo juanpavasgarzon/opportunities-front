@@ -1,4 +1,6 @@
-import { getMeApi, loginApi, logoutApi, resetMyPasswordApi, updateMeApi } from '@/lib/api/auth';
+import { getMeApi, loginApi, logoutApi, resetMyPasswordApi, updateMeApi, UpdateMeRequest, LoginRequest } from '@/lib/api/auth';
+import { ApiError } from '@/lib/api/client';
+import { clearAuth } from '@/lib/auth';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export const authKeys = {
@@ -6,12 +8,13 @@ export const authKeys = {
   me: () => [...authKeys.all, 'me'] as const,
 };
 
-export function useMe() {
+export function useMe(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: authKeys.me(),
     queryFn: getMeApi,
     retry: false,
     staleTime: 5 * 60 * 1000,
+    enabled: options?.enabled !== false,
   });
 }
 
@@ -19,7 +22,7 @@ export function useUpdateMe() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (full_name: string) => updateMeApi(full_name),
+    mutationFn: (data: UpdateMeRequest) => updateMeApi(data),
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: authKeys.me() });
       if (typeof window !== 'undefined') {
@@ -38,13 +41,19 @@ export function useUpdateMe() {
         window.dispatchEvent(new Event('auth-user-updated'));
       }
     },
+    onError: (error: unknown) => {
+      // If token was invalidated (401), the API client will handle logout and redirect
+      // We just need to clean up React Query cache
+      if (error instanceof ApiError && error.status === 401) {
+        queryClient.removeQueries({ queryKey: authKeys.all });
+      }
+    },
   });
 }
 
 export function useLogin() {
   return useMutation({
-    mutationFn: ({ username, password }: { username: string; password: string }) =>
-      loginApi(username, password),
+    mutationFn: ({ username_or_email, password }: LoginRequest) => loginApi(username_or_email, password),
   });
 }
 
@@ -54,18 +63,16 @@ export function useLogout() {
   return useMutation({
     mutationFn: logoutApi,
     onSuccess: () => {
+      // Clear everything - API successfully deleted cookie
       queryClient.removeQueries({ queryKey: authKeys.all });
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_user');
-        window.dispatchEvent(new Event('auth-user-removed'));
-      }
+      clearAuth();
     },
     onError: () => {
+      // Even if logout API fails (e.g., 401 because token already invalid), clear local state
+      // This ensures we clean up even if the server-side cookie deletion failed
       queryClient.removeQueries({ queryKey: authKeys.all });
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('auth_user');
-        window.dispatchEvent(new Event('auth-user-removed'));
-      }
+      clearAuth();
+      // Don't re-throw - we want to clear state even if API fails
     },
   });
 }
