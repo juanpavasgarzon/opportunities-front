@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle, X } from '@/components/icons';
 import { useEffect, useRef } from 'react';
 import { Button } from './Button';
 
@@ -82,21 +82,21 @@ export function ConfirmModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
       <div
         ref={modalRef}
-        className="bg-gray-800 rounded-lg shadow-xl max-w-md w-full border border-gray-700 animate-in zoom-in-95 duration-200"
+        className="bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-gray-700 animate-in zoom-in-95 duration-200"
       >
-        <div className="p-6">
-          <div className="flex items-start gap-4">
-            <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${variantStyles[variant]}`}>
-              <AlertTriangle className={`h-6 w-6 ${iconColors[variant]}`} />
+        <div className="p-4 sm:p-6">
+          <div className="flex items-start gap-3 sm:gap-4">
+            <div className={`flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center ${variantStyles[variant]}`}>
+              <AlertTriangle className={`h-5 w-5 sm:h-6 sm:w-6 ${iconColors[variant]}`} />
             </div>
-            <div className="flex-1">
-              <h3 className="text-xl font-semibold text-white mb-2">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base sm:text-lg md:text-xl font-semibold text-white mb-2">
                 {title}
               </h3>
-              <p className="text-gray-300 whitespace-pre-line">
+              <p className="text-xs sm:text-sm md:text-base text-gray-300 whitespace-pre-line">
                 {message}
               </p>
             </div>
@@ -108,10 +108,11 @@ export function ConfirmModal({
             </button>
           </div>
 
-          <div className="flex justify-end gap-3 mt-6">
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 mt-4 sm:mt-6">
             <Button
               variant="outline"
               onClick={onClose}
+              className="w-full sm:w-auto text-sm sm:text-base"
             >
               {cancelText}
             </Button>
@@ -123,7 +124,7 @@ export function ConfirmModal({
                   onClose();
                 }
               }}
-              className={buttonVariants[variant]}
+              className={`${buttonVariants[variant]} w-full sm:w-auto text-sm sm:text-base`}
             >
               {confirmText}
             </Button>

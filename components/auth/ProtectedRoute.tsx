@@ -2,7 +2,7 @@
 
 import { getCurrentUser, isAuthorized } from '@/lib/auth';
 import { User, UserRole } from '@/lib/types';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/components/icons';
 import { useTranslations } from 'next-intl';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

@@ -5,7 +5,7 @@ import { JobOpportunityInfo } from '@/components/jobs/JobOpportunityInfo';
 import { Button } from '@/components/ui/Button';
 import { useJob } from '@/hooks/useJobs';
 import { applyToJob } from '@/lib/api/jobs';
-import { ArrowLeft, Loader2, Share2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Share2 } from '@/components/icons';
 import { useLocale, useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -58,6 +58,7 @@ export default function ApplyPage() {
         name: data.name,
         email: data.email,
         phone: data.phone,
+        language: locale,
         cv: data.cv,
       });
 
@@ -65,7 +66,7 @@ export default function ApplyPage() {
 
       setTimeout(() => {
         router.push(`/${locale}`);
-      }, 2000);
+      }, 1000);
     } catch {
       toast.error(t('jobs.applicationError'));
     } finally {
@@ -98,12 +99,12 @@ export default function ApplyPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 max-w-4xl">
-        <div className="mb-6 flex items-center justify-between">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 max-w-4xl">
+        <div className="mb-4 sm:mb-6 flex flex-row items-center justify-between gap-2 sm:gap-0">
           <Button
             variant="outline"
             onClick={() => router.push(`/${locale}`)}
-            className="flex items-center gap-2"
+            className="flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             <ArrowLeft className="h-4 w-4" />
             {t('common.goBack')}
@@ -111,7 +112,7 @@ export default function ApplyPage() {
           <Button
             variant="outline"
             onClick={handleShare}
-            className="flex items-center gap-2"
+            className="flex items-center justify-center gap-2 text-sm sm:text-base"
           >
             <Share2 className="h-4 w-4" />
             {t('common.share')}

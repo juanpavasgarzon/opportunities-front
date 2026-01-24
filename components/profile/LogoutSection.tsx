@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/Button';
-import { Loader2, LogOut } from 'lucide-react';
+import { Loader2, LogOut } from '@/components/icons';
 import { useTranslations } from 'next-intl';
 
 interface LogoutSectionProps {
@@ -13,8 +13,8 @@ export function LogoutSection({ isLoading, onLogout }: LogoutSectionProps) {
   const t = useTranslations();
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold text-white mb-4">
+    <div className="bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+      <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">
         {t('profile.session')}
       </h2>
       <Button

@@ -18,14 +18,16 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Smooth page transitions */
+[class*="border"] {
+  transition-property: background-color, color, fill, stroke;
+}
+
 * {
-  transition-property: background-color, border-color, color, fill, stroke;
+  transition-property: background-color, color, fill, stroke;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
 }
 
-/* Animation utilities */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -88,13 +90,26 @@ body {
   animation: slideInFromRight 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Page transition wrapper */
+@keyframes slideInFromBottom {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.slide-in-from-bottom-2 {
+  animation: slideInFromBottom 0.3s ease-out;
+}
+
 .page-transition {
   animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
-/* Smooth page exit */
 .page-exit {
   animation: fadeOut 0.3s cubic-bezier(0.4, 0, 1, 1);
 }
@@ -110,7 +125,15 @@ body {
   }
 }
 
-/* Smooth transitions for all interactive elements */
 a, button, input, select, textarea {
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

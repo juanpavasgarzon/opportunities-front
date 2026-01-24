@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from '@/components/icons';
 import { useTranslations } from 'next-intl';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from './Button';
@@ -125,7 +125,7 @@ export function DataTable<T extends { id: string | number }>({
           <thead className="bg-gray-800">
             <tr>
               {actions && (
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider w-24 whitespace-nowrap">
+                <th className="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider w-20 sm:w-24 whitespace-nowrap">
                   <span className="whitespace-nowrap">{actionsLabel ?? t('common.actions')}</span>
                 </th>
               )}
@@ -134,9 +134,9 @@ export function DataTable<T extends { id: string | number }>({
                 return (
                   <th
                     key={String(column.key)}
-                    className={`px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider ${
+                    className={`px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider ${
                       column.sortable ? 'cursor-pointer hover:bg-gray-700' : ''
-                    } ${isDateColumn ? 'min-w-[140px]' : ''}`}
+                    } ${isDateColumn ? 'min-w-[120px] sm:min-w-[140px]' : ''}`}
                     onClick={() => column.sortable && handleSort(column.key)}
                   >
                     {column.label}
@@ -169,7 +169,7 @@ export function DataTable<T extends { id: string | number }>({
                 >
                   {actions && (
                     <td
-                      className="px-6 py-4 whitespace-nowrap text-sm w-24"
+                      className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm w-20 sm:w-24"
                       onClick={(e) => e.stopPropagation()}
                     >
                       {actions(row)}
@@ -178,7 +178,7 @@ export function DataTable<T extends { id: string | number }>({
                   {columns.map((column) => (
                     <td
                       key={String(column.key)}
-                      className="px-6 py-4 whitespace-nowrap text-sm text-gray-100"
+                      className="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-xs sm:text-sm text-gray-100"
                     >
                       {column.render
                         ? column.render(row[column.key as keyof T], row)
@@ -193,8 +193,8 @@ export function DataTable<T extends { id: string | number }>({
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-between px-6 py-4 bg-gray-900 border-t border-gray-700">
-          <div className="text-sm text-gray-300">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0 px-3 sm:px-6 py-3 sm:py-4 bg-gray-900 border-t border-gray-700">
+          <div className="text-xs sm:text-sm text-gray-300 text-center sm:text-left">
             {t('common.showingResults', {
               start: (currentPage - 1) * pageSize + 1,
               end: Math.min(currentPage * pageSize, totalCount),

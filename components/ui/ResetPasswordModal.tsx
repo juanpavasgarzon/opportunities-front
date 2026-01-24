@@ -1,6 +1,6 @@
 'use client';
 
-import { Eye, EyeOff, Key, RefreshCw, X } from 'lucide-react';
+import { Eye, EyeOff, Key, RefreshCw, X } from '@/components/icons';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 import { Button } from './Button';
@@ -125,22 +125,22 @@ export function ResetPasswordModal({
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
       <div
         ref={modalRef}
-        className="bg-gray-800 rounded-lg shadow-xl max-w-md w-full border border-gray-700 animate-in zoom-in-95 duration-200"
+        className="bg-gray-800 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto border border-gray-700 animate-in zoom-in-95 duration-200"
       >
-        <div className="p-6">
-          <div className="flex items-start gap-4 mb-6">
+        <div className="p-4 sm:p-6">
+          <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div className="flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center bg-yellow-500/10 border border-yellow-500/50">
               <Key className="h-6 w-6 text-yellow-400" />
             </div>
-            <div className="flex-1">
-              <h3 className="text-xl font-semibold text-white mb-2">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg sm:text-xl font-semibold text-white mb-2">
                 {title || t('common.resetPassword')}
               </h3>
               {username && (
-                <p className="text-gray-300 text-sm">
+                <p className="text-gray-300 text-xs sm:text-sm">
                   {t('users.resetPasswordFor', { username })}
                 </p>
               )}
@@ -230,12 +230,13 @@ export function ResetPasswordModal({
               <div className="text-red-400 text-sm">{error}</div>
             )}
 
-            <div className="flex justify-end gap-3 mt-6">
+            <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 mt-4 sm:mt-6">
               <Button
                 variant="outline"
                 onClick={onClose}
                 type="button"
                 disabled={loading}
+                className="w-full sm:w-auto text-sm sm:text-base"
               >
                 {t('common.cancel')}
               </Button>
@@ -243,7 +244,7 @@ export function ResetPasswordModal({
                 variant="primary"
                 type="submit"
                 disabled={loading || !password || !confirmPassword}
-                className="bg-yellow-600 hover:bg-yellow-700"
+                className="bg-yellow-600 hover:bg-yellow-700 w-full sm:w-auto text-sm sm:text-base"
               >
                 {loading ? t('common.loading') : t('common.confirm')}
               </Button>

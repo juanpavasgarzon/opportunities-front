@@ -13,7 +13,7 @@ import { useActivateUser, useCreateUser, useDeactivateUser, useDeleteUser, useRe
 import { getCurrentUser } from '@/lib/auth';
 import { User } from '@/lib/types';
 import { formatDateLocale } from '@/lib/utils/date';
-import { Loader2 } from 'lucide-react';
+import { Loader2 } from '@/components/icons';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

@@ -1,5 +1,5 @@
-import { apiDelete, apiGet, apiPost, apiPut } from './client';
 import { JobOpportunity } from '../types';
+import { apiDelete, apiGet, apiPost, apiPut } from './client';
 
 export interface PaginationParams {
   page?: number;
@@ -261,6 +261,7 @@ export interface ApplyToJobRequest {
   name: string;
   email: string;
   phone: string;
+  language: string;
   cv: File;
 }
 
@@ -273,6 +274,9 @@ export async function applyToJob(id: string, data: ApplyToJobRequest): Promise<v
   }
   if (!data.phone || !data.phone.trim()) {
     throw new Error('Phone is required');
+  }
+  if (!data.language || !data.language.trim()) {
+    throw new Error('Language is required');
   }
   if (!data.cv) {
     throw new Error('CV file is required');
@@ -287,6 +291,7 @@ export async function applyToJob(id: string, data: ApplyToJobRequest): Promise<v
   formData.append('name', data.name.trim());
   formData.append('email', data.email.trim());
   formData.append('phone', data.phone.trim());
+  formData.append('language', data.language.trim());
   formData.append('cv', data.cv);
 
   await apiPost<void>(`/opportunities/${id}/apply`, formData, { skipAuth: true });

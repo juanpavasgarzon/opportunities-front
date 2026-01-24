@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { User, UserRole } from '@/lib/types';
-import { Eye, EyeOff, RefreshCw, X } from 'lucide-react';
+import { Eye, EyeOff, RefreshCw, X } from '@/components/icons';
 import { useTranslations } from 'next-intl';
 import { useEffect, useRef, useState } from 'react';
 
@@ -120,10 +120,10 @@ export function UserModal({ onSave, onClose, isOpen, user, isEdit = false }: Use
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
-      <div ref={modalRef} className="bg-gray-800 rounded-lg shadow-xl p-6 max-w-md w-full border border-gray-700 animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-in fade-in duration-200">
+      <div ref={modalRef} className="bg-gray-800 rounded-lg shadow-xl p-4 sm:p-6 max-w-md w-full max-h-[90vh] overflow-y-auto border border-gray-700 animate-in zoom-in-95 duration-200">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-bold text-white">
+          <h2 className="text-lg sm:text-2xl font-bold text-white">
             {isEdit ? t('common.update') : t('common.create')} {t('users.title')}
           </h2>
           <button
@@ -201,11 +201,11 @@ export function UserModal({ onSave, onClose, isOpen, user, isEdit = false }: Use
               <option value="admin">{t('roles.admin')}</option>
             </select>
           </div>
-          <div className="flex justify-end gap-2">
-            <Button variant="outline" type="button" onClick={onClose}>
+          <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
+            <Button variant="outline" type="button" onClick={onClose} className="w-full sm:w-auto text-sm sm:text-base">
               {t('common.cancel')}
             </Button>
-            <Button variant="primary" type="submit">
+            <Button variant="primary" type="submit" className="w-full sm:w-auto text-sm sm:text-base">
               {t('common.save')}
             </Button>
           </div>

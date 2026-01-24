@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { User } from '@/lib/types';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save } from '@/components/icons';
 import { useTranslations } from 'next-intl';
 
 interface UpdateAccountSectionProps {
@@ -35,8 +35,8 @@ export function UpdateAccountSection({
   const isDisabled = isLoading || !hasChanges;
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold text-white mb-4">
+    <div className="bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+      <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">
         {t('profile.updateAccount')}
       </h2>
       <div className="space-y-4">

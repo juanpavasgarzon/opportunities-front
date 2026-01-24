@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/Button';
-import { Key, Loader2 } from 'lucide-react';
+import { Key, Loader2 } from '@/components/icons';
 import { useTranslations } from 'next-intl';
 
 interface ResetPasswordSectionProps {
@@ -13,8 +13,8 @@ export function ResetPasswordSection({ isLoading, onResetClick }: ResetPasswordS
   const t = useTranslations();
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold text-white mb-4">
+    <div className="bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+      <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">
         {t('profile.resetPassword')}
       </h2>
       <Button

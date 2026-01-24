@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { CheckCircle2, FileText, Upload } from 'lucide-react';
+import { CheckCircle2, FileText, Upload } from '@/components/icons';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRef, useState } from 'react';
 
@@ -104,15 +104,14 @@ export function ApplicationForm({ onSubmit, isSubmitting, onValidationError }: A
   };
 
   return (
-    <form onSubmit={handleSubmit} className="p-6 space-y-6">
+    <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
       <div>
-        <h3 className="text-lg font-semibold text-white mb-6">
+        <h3 className="text-base sm:text-lg font-semibold text-white mb-4 sm:mb-6">
           {t('common.application')}
         </h3>
 
-        <div className="space-y-6">
-          {/* Personal Information */}
-          <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
               label={t('common.name')}
               value={name}
@@ -135,7 +134,6 @@ export function ApplicationForm({ onSubmit, isSubmitting, onValidationError }: A
             />
           </div>
 
-          {/* Legal Agreements */}
           <div className="space-y-3">
             <div className="flex items-start gap-3">
               <input
@@ -179,7 +177,6 @@ export function ApplicationForm({ onSubmit, isSubmitting, onValidationError }: A
             </div>
           </div>
 
-          {/* File Upload with Drag and Drop - Centered */}
           <div className="flex justify-center">
             <div className="w-full max-w-md">
               <label className="block text-sm font-medium mb-2 text-gray-300 text-center">
@@ -259,6 +256,7 @@ export function ApplicationForm({ onSubmit, isSubmitting, onValidationError }: A
           variant="primary"
           type="submit"
           disabled={isSubmitting || !isFormValid()}
+          className="w-full sm:w-auto text-sm sm:text-base"
         >
           {isSubmitting ? (
             <>

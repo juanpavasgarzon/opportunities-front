@@ -4,7 +4,7 @@ import { DataTable } from '@/components/ui/DataTable';
 import { useJobs } from '@/hooks/useJobs';
 import { JobOpportunity } from '@/lib/types';
 import { formatDateLocale } from '@/lib/utils/date';
-import { Eye, Loader2 } from 'lucide-react';
+import { Eye, Loader2 } from '@/components/icons';
 import { useTranslations, useLocale } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';

@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/Button';
 import { User } from '@/lib/types';
-import { Edit, Key, Loader2, Shield, ShieldOff, Trash2 } from 'lucide-react';
+import { Edit, Key, Loader2, Shield, ShieldOff, Trash2 } from '@/components/icons';
 import { useTranslations } from 'next-intl';
 
 interface UsersTableActionsProps {

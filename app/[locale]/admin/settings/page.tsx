@@ -8,7 +8,7 @@ import { EmailTestSection } from '@/components/settings/EmailTestSection';
 import { useConfiguration, useUpdateCompanyConfiguration, useUpdateEmailConfiguration } from '@/hooks/useConfiguration';
 import { testEmailConnection } from '@/lib/api/email';
 import { getCurrentUser } from '@/lib/auth';
-import { Settings as SettingsIcon } from 'lucide-react';
+import { Settings as SettingsIcon } from '@/components/icons';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -217,12 +217,12 @@ export default function SettingsPage() {
   return (
     <ProtectedRoute requiredRole={['owner']}>
       <div>
-        <h1 className="text-3xl font-bold text-white mb-6 flex items-center gap-3">
-          <SettingsIcon className="h-8 w-8" />
+        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4 sm:mb-6 flex items-center gap-2 sm:gap-3">
+          <SettingsIcon className="h-6 w-6 sm:h-8 sm:w-8" />
           {t('settings.title')}
         </h1>
 
-        <div className="space-y-8">
+        <div className="space-y-6 sm:space-y-8">
           <CompanyConfigurationForm
             companyName={companyName}
             logo={logo}

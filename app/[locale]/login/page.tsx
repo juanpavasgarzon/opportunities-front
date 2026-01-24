@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/Input';
 import { useLogin, useMe } from '@/hooks/useAuth';
 import { getCurrentUser, setCurrentUser } from '@/lib/auth';
 import { User } from '@/lib/types';
-import { ArrowLeft, Eye, EyeOff } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff } from '@/components/icons';
 import { useLocale, useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -118,29 +118,30 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
-      <div className="mb-6">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 relative">
+      <div className="mb-4 sm:mb-6">
         <Button
           variant="outline"
           onClick={() => router.push(`/${locale}`)}
-          className="flex items-center gap-2"
+          className="flex items-center gap-2 text-sm sm:text-base"
         >
           <ArrowLeft className="h-4 w-4" />
-          {t('common.goBack')}
+          <span className="hidden sm:inline">{t('common.goBack')}</span>
+          <span className="sm:hidden">{t('common.goBack')}</span>
         </Button>
       </div>
-      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-        <div className="w-full max-w-md space-y-6">
+      <div className="flex items-center justify-center min-h-[calc(100vh-180px)] sm:min-h-[calc(100vh-200px)]">
+        <div className="w-full max-w-md space-y-4 sm:space-y-6 px-2 sm:px-0">
           <div>
-            <h2 className="text-center text-3xl font-extrabold text-white">
+            <h2 className="text-center text-2xl sm:text-3xl font-extrabold text-white">
               {t('auth.loginTitle')}
             </h2>
-            <p className="mt-3 text-center text-sm text-gray-300 max-w-md mx-auto">
+            <p className="mt-2 sm:mt-3 text-center text-xs sm:text-sm text-gray-300 max-w-md mx-auto px-2">
               {t('auth.loginDescription')}
             </p>
           </div>
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-4">
+          <form className="space-y-4 sm:space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-3 sm:space-y-4">
               <Input
                 label={t('auth.usernameOrEmail')}
                 type="text"
@@ -162,7 +163,7 @@ export default function LoginPage() {
                     required
                     autoComplete="current-password"
                     placeholder="••••••••"
-                    className="w-full px-3 py-2 pr-10 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-800 text-white"
+                    className="w-full px-3 py-2 pr-10 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-800 text-white text-sm sm:text-base"
                   />
                   <button
                     type="button"
@@ -184,7 +185,7 @@ export default function LoginPage() {
               type="submit"
               variant="primary"
               size="lg"
-              className="w-full"
+              className="w-full text-sm sm:text-base"
               disabled={loginMutation.isPending}
             >
               {loginMutation.isPending ? t('common.loading') : t('auth.loginButton')}

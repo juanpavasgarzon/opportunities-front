@@ -7,7 +7,7 @@ import { OpportunitiesSearchBar } from '@/components/opportunities/Opportunities
 import { useJobs } from '@/hooks/useJobs';
 import { JobOpportunity } from '@/lib/types';
 import { formatDateLocale } from '@/lib/utils/date';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2, Plus } from '@/components/icons';
 import { useTranslations } from 'next-intl';
 import { useEffect, useState } from 'react';
 
@@ -130,14 +130,14 @@ export function OpportunitiesTable({
 
   return (
     <>
-      <div className="mb-6 flex items-center justify-between gap-4">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
         <OpportunitiesSearchBar value={inputValue} onChange={setInputValue} />
         <Button
           variant="primary"
           onClick={onCreate}
-          className="flex items-center gap-2"
+          className="flex items-center justify-center gap-2 text-sm sm:text-base w-full sm:w-auto"
         >
-          <Plus size={20} />
+          <Plus size={18} className="sm:w-5 sm:h-5" />
           {t('common.create')}
         </Button>
       </div>

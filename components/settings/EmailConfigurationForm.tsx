@@ -2,7 +2,7 @@
 
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Loader2, Save } from 'lucide-react';
+import { Loader2, Save } from '@/components/icons';
 import { useTranslations } from 'next-intl';
 
 interface EmailConfigurationFormProps {
@@ -29,8 +29,8 @@ export function EmailConfigurationForm({
   const t = useTranslations();
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold text-white mb-4">
+    <div className="bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+      <h2 className="text-lg sm:text-xl font-semibold text-white mb-4">
         {t('settings.email')}
       </h2>
       <div className="space-y-4">

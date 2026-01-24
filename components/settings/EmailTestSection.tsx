@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/Button';
-import { Loader2, Mail } from 'lucide-react';
+import { Loader2, Mail } from '@/components/icons';
 import { useTranslations } from 'next-intl';
 
 interface EmailTestSectionProps {
@@ -14,9 +14,9 @@ export function EmailTestSection({ testingConnection, testResult, onTest }: Emai
   const t = useTranslations();
 
   return (
-    <div className="bg-gray-800 rounded-lg shadow p-6">
-      <h2 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
-        <Mail className="h-5 w-5" />
+    <div className="bg-gray-800 rounded-lg shadow p-4 sm:p-6">
+      <h2 className="text-lg sm:text-xl font-semibold text-white mb-4 flex items-center gap-2">
+        <Mail className="h-4 w-4 sm:h-5 sm:w-5" />
         {t('settings.emailTest')}
       </h2>
       <div className="space-y-4">

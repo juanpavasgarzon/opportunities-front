@@ -72,8 +72,8 @@ export function JobForm({ job, onSubmit, onCancel, isLoading = false }: JobFormP
         </h1>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
-        <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
             label={t('jobs.titleColumn')}
             value={formData.title || ''}
@@ -150,12 +150,13 @@ export function JobForm({ job, onSubmit, onCancel, isLoading = false }: JobFormP
           onChange={(e) => setFormData({ ...formData, company_info: e.target.value })}
           rows={4}
         />
-        <div className="flex justify-end gap-2 pt-4 border-t border-gray-700">
+        <div className="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-2 pt-4 border-t border-gray-700">
           <Button
             variant="outline"
             type="button"
             onClick={onCancel}
             disabled={isLoading}
+            className="w-full sm:w-auto text-sm sm:text-base"
           >
             {t('common.cancel')}
           </Button>
@@ -163,6 +164,7 @@ export function JobForm({ job, onSubmit, onCancel, isLoading = false }: JobFormP
             variant="primary"
             type="submit"
             disabled={isLoading}
+            className="w-full sm:w-auto text-sm sm:text-base"
           >
             {isLoading ? (
               <>
