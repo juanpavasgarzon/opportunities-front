@@ -64,7 +64,6 @@ export default function ProfilePage() {
           name: user.name || user.full_name || '',
           email: user.email || ''
         });
-        // Store original values for comparison
         setOriginalUserData({
           username: user.username || '',
           email: user.email || '',
@@ -80,17 +79,14 @@ export default function ProfilePage() {
       return;
     }
 
-    // Check if sensitive data (username or email) has changed
     const usernameChanged = originalUserData && formData.username.trim() !== originalUserData.username;
     const emailChanged = originalUserData && formData.email.trim() !== originalUserData.email;
 
-    // If sensitive data changed, show confirmation modal
     if (usernameChanged || emailChanged) {
       setShowAccountUpdateConfirmModal(true);
       return;
     }
 
-    // If only full_name changed, proceed without confirmation
     await performAccountUpdate();
   };
 
@@ -105,11 +101,8 @@ export default function ProfilePage() {
       toast.success(t('profile.accountUpdated'));
     } catch (error) {
       console.error(error);
-      // If 401, the API client will handle logout and redirect automatically
-      // We just need to show the error message
       if (error instanceof ApiError && error.status === 401) {
         toast.error(error.message || t('profile.sessionExpired'));
-        // Redirect is handled by API client, but we can add a small delay for UX
       } else {
         const errorMessage = error instanceof Error ? error.message : t('profile.errorUpdatingAccount');
         toast.error(errorMessage);
@@ -123,7 +116,6 @@ export default function ProfilePage() {
   };
 
   const handleResetPassword = async (password: string) => {
-    // Show confirmation modal first
     setPendingPassword(password);
     setShowPasswordChangeConfirmModal(true);
     setShowResetPasswordModal(false);
@@ -135,8 +127,6 @@ export default function ProfilePage() {
     try {
       await resetPasswordMutation.mutateAsync(pendingPassword);
       toast.success(t('profile.passwordResetSuccess'));
-      // Session will be invalidated by backend, API client will handle redirect
-      // Don't close modal here - let the redirect happen
     } catch (error) {
       console.error('Error resetting password:', error);
       const errorMessage = error instanceof Error ? error.message : t('profile.errorResettingPassword');
@@ -147,7 +137,6 @@ export default function ProfilePage() {
   };
 
   const handleLogout = () => {
-    // Show confirmation modal first
     setShowLogoutConfirmModal(true);
   };
 
@@ -155,11 +144,8 @@ export default function ProfilePage() {
     try {
       await logoutMutation.mutateAsync();
     } catch (error) {
-      // Even if logout API fails, we still clear local auth
       console.error('Logout error (ignored):', error);
     }
-    // clearAuth is already called in the hook's onSuccess/onError
-    // Use replace to avoid adding to history and prevent loops
     router.replace(`/${locale}/login`);
   };
 
@@ -247,7 +233,6 @@ export default function ProfilePage() {
           onClose={() => {
             setShowPasswordChangeConfirmModal(false);
             setPendingPassword(null);
-            // Reopen the password modal if user cancels
             if (pendingPassword) {
               setShowResetPasswordModal(true);
             }

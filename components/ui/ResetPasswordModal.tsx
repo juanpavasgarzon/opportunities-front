@@ -13,7 +13,7 @@ interface ResetPasswordModalProps {
   title?: string;
   username?: string;
   loading?: boolean;
-  showSessionWarning?: boolean; // Show warning about session being closed (for own password change)
+  showSessionWarning?: boolean;
 }
 
 export function ResetPasswordModal({

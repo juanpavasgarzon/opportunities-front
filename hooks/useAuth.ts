@@ -42,8 +42,6 @@ export function useUpdateMe() {
       }
     },
     onError: (error: unknown) => {
-      // If token was invalidated (401), the API client will handle logout and redirect
-      // We just need to clean up React Query cache
       if (error instanceof ApiError && error.status === 401) {
         queryClient.removeQueries({ queryKey: authKeys.all });
       }
@@ -63,16 +61,12 @@ export function useLogout() {
   return useMutation({
     mutationFn: logoutApi,
     onSuccess: () => {
-      // Clear everything - API successfully deleted cookie
       queryClient.removeQueries({ queryKey: authKeys.all });
       clearAuth();
     },
     onError: () => {
-      // Even if logout API fails (e.g., 401 because token already invalid), clear local state
-      // This ensures we clean up even if the server-side cookie deletion failed
       queryClient.removeQueries({ queryKey: authKeys.all });
       clearAuth();
-      // Don't re-throw - we want to clear state even if API fails
     },
   });
 }

@@ -1,7 +1,7 @@
 import { apiGet, apiPost, apiPut } from './client';
 
 export interface LoginRequest {
-  username_or_email: string; // Can be username or email
+  username_or_email: string;
   password: string;
 }
 
@@ -40,15 +40,10 @@ export async function updateMeApi(data: UpdateMeRequest): Promise<MeResponse> {
 }
 
 export async function logoutApi(): Promise<void> {
-  // Don't use skipAuth - we need to send the cookie so the backend can delete it
-  // Even if it returns 401, we'll handle it gracefully
   try {
     await apiPost<void>('/auth/logout');
   } catch (error) {
-    // If logout fails (e.g., token already invalid), that's okay
-    // We'll still clear local state
     if (error instanceof Error && error.message.includes('401')) {
-      // Token already invalid, which is fine for logout
       return;
     }
     throw error;
@@ -60,7 +55,6 @@ export interface ChangePasswordRequest {
 }
 
 export async function resetMyPasswordApi(newPassword: string): Promise<void> {
-  // Use /auth/change-password endpoint for authenticated users
   await apiPost<void>('/auth/change-password', {
     new_password: newPassword,
   });

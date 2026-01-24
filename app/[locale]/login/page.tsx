@@ -20,10 +20,10 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
   const loginMutation = useLogin();
-  // Only fetch /auth/me if there's a user in localStorage (to avoid unnecessary requests after logout)
+  
   const localUser = typeof window !== 'undefined' ? getCurrentUser() : null;
   const { data: currentUser, isLoading: isLoadingUser, error: meError } = useMe({
-    enabled: !!localUser, // Only fetch if there's a user in localStorage
+    enabled: !!localUser,
   });
 
   useEffect(() => {
@@ -37,12 +37,9 @@ export default function LoginPage() {
       return;
     }
 
-    // If there's an error (401, etc.), user is not authenticated - stay on login page
-    // Clear any stale user data from localStorage
     if (meError) {
       const staleUser = getCurrentUser();
       if (staleUser) {
-        // Clear stale user data
         if (typeof window !== 'undefined') {
           localStorage.removeItem('auth_user');
         }
@@ -51,9 +48,7 @@ export default function LoginPage() {
     }
 
     const localUser = getCurrentUser();
-    
-    // Only redirect if there's a valid user in localStorage AND we got a valid response from API
-    // This prevents redirecting when user just logged out (localStorage cleared but API might still be loading)
+
     if (localUser && localUser.active && !isLoadingUser && currentUser && currentUser.active) {
       if (currentUser.role === 'owner') {
         router.replace(`/${locale}/admin/users`);
@@ -63,7 +58,6 @@ export default function LoginPage() {
       return;
     }
 
-    // If localStorage is empty but API returns a user, update localStorage and redirect
     if (!localUser && !isLoadingUser && currentUser && currentUser.active) {
       const user: User = {
         id: String(currentUser.id),

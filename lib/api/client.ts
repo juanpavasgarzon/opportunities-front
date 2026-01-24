@@ -18,7 +18,6 @@ let isRedirecting = false;
 function handleUnauthorized(): void {
   if (typeof window !== 'undefined' && !isRedirecting) {
     const currentPath = window.location.pathname;
-    // Don't redirect if we're already on login page
     if (currentPath.includes('/login')) {
       return;
     }
@@ -26,7 +25,6 @@ function handleUnauthorized(): void {
     isRedirecting = true;
     clearAuth();
     const locale = currentPath.split('/')[1] || 'en';
-    // Use window.location.replace to avoid adding to history and prevent loops
     window.location.replace(`/${locale}/login`);
   }
 }
@@ -78,14 +76,10 @@ export async function apiRequest<T>(
       }
 
       if (response.status === 401 || response.status === 403) {
-        // Don't auto-redirect for logout endpoint - let the component handle it
         const isLogoutEndpoint = endpoint.includes('/auth/logout');
-        
-        // Clear auth and redirect to login before throwing error (except for logout)
         if (response.status === 401 && !options.skipAuth && !isLogoutEndpoint) {
           handleUnauthorized();
         }
-        // Use message from errorData, or error field, or default message
         const errorMessage = errorData.message || errorData.error || 'Unauthorized';
         throw new ApiError(
           errorMessage,

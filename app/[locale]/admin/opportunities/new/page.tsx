@@ -45,7 +45,7 @@ function CreateOpportunityContent() {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : t('jobs.jobCreateError');
       toast.error(errorMessage);
-      throw error; // Re-throw to let JobForm handle the error display
+      throw error;
     }
   };
 

@@ -13,7 +13,7 @@ interface ConfirmModalProps {
   confirmText?: string;
   cancelText?: string;
   variant?: 'danger' | 'warning' | 'info';
-  closeOnConfirm?: boolean; // If false, modal won't close automatically after confirm
+  closeOnConfirm?: boolean;
 }
 
 export function ConfirmModal({
