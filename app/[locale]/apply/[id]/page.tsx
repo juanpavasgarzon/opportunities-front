@@ -63,10 +63,7 @@ export default function ApplyPage() {
       });
 
       toast.success(t('jobs.applicationSubmitted', { title: job?.title || '' }));
-
-      setTimeout(() => {
-        router.push(`/${locale}`);
-      }, 1000);
+      router.push(`/${locale}`);
     } catch {
       toast.error(t('jobs.applicationError'));
     } finally {
@@ -100,35 +97,35 @@ export default function ApplyPage() {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 max-w-4xl">
-        <div className="mb-4 sm:mb-6 flex flex-row items-center justify-between gap-2 sm:gap-0">
-          <Button
-            variant="outline"
-            onClick={() => router.push(`/${locale}`)}
-            className="flex items-center justify-center gap-2 text-sm sm:text-base"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t('common.goBack')}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={handleShare}
-            className="flex items-center justify-center gap-2 text-sm sm:text-base"
-          >
-            <Share2 className="h-4 w-4" />
-            {t('common.share')}
-          </Button>
-        </div>
+      <div className="mb-4 sm:mb-6 flex flex-row items-center justify-between gap-2 sm:gap-0">
+        <Button
+          variant="outline"
+          onClick={() => router.push(`/${locale}`)}
+          className="flex items-center justify-center gap-2 text-sm sm:text-base"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          {t('common.goBack')}
+        </Button>
+        <Button
+          variant="outline"
+          onClick={handleShare}
+          className="flex items-center justify-center gap-2 text-sm sm:text-base"
+        >
+          <Share2 className="h-4 w-4" />
+          {t('common.share')}
+        </Button>
+      </div>
 
-        <div className="bg-gray-800 rounded-lg shadow-xl border border-gray-700 overflow-hidden">
-          <JobOpportunityInfo job={job} />
-          <ApplicationForm 
-            onSubmit={handleSubmit} 
-            isSubmitting={isSubmitting}
-            onValidationError={(message) => {
-              toast.error(message);
-            }}
-          />
-        </div>
+      <div className="bg-gray-800 rounded-lg shadow-xl border border-gray-700 overflow-hidden">
+        <JobOpportunityInfo job={job} />
+        <ApplicationForm
+          onSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
+          onValidationError={(message) => {
+            toast.error(message);
+          }}
+        />
+      </div>
     </div>
   );
 }

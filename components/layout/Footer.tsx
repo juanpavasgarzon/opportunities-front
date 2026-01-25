@@ -1,10 +1,9 @@
 'use client';
 
 import { useAppInfo } from '@/hooks/useConfiguration';
-import { useTranslations, useLocale } from 'next-intl';
-import { usePathname, useRouter } from 'next/navigation';
+import { useLocale, useTranslations } from 'next-intl';
 import Image from 'next/image';
-import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 export function Footer() {
@@ -26,14 +25,11 @@ export function Footer() {
     if (!mounted || newLocale === locale) {
       return;
     }
-    
+
     const path = pathname || '';
     const pathWithoutLocale = path.replace(/^\/(en|es|pt)/, '');
     const newPath = `/${newLocale}${pathWithoutLocale || ''}`;
-    
-    setTimeout(() => {
-      router.push(newPath);
-    }, 50);
+    router.push(newPath);
   };
 
   const languages = [
